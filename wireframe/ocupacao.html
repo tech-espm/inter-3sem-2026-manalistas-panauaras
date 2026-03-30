@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="pt-BR" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Módulo de Fluxo e Ocupação</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="page">
+    <div class="layout-root">
+      <!-- Top Navigation Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="topbar-metric-icon">
+            <span class="material-symbols-outlined topbar-logo-icon">
+              health_metrics
+            </span>
+          </div>
+          <h2 class="topbar-title">
+            Módulo de Fluxo e Ocupação
+          </h2>
+        </div>
+        <div class="topbar-right">
+          <div class="system-status-chip">
+            <span
+              class="material-symbols-outlined system-status-dot"
+            >
+              fiber_manual_record
+            </span>
+            <span class="system-status-text">
+              Sistema Online
+            </span>
+          </div>
+          <button class="icon-button icon-button-ghost-soft">
+            <span class="material-symbols-outlined">
+              notifications
+            </span>
+          </button>
+          <button class="icon-button icon-button-ghost-soft">
+            <span class="material-symbols-outlined">
+              settings
+            </span>
+          </button>
+          <div class="user-avatar user-avatar-small">
+            <span class="material-symbols-outlined user-avatar-icon">
+              person
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <div class="flex-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar sidebar-thin">
+          <div class="sidebar-unit-card">
+            <p class="sidebar-unit-label">
+              Unidade Selecionada
+            </p>
+            <p class="sidebar-unit-name">
+              Hospital Central
+            </p>
+            <p class="sidebar-unit-meta">
+              Prédio B - Ala Norte
+            </p>
+          </div>
+          <nav class="sidebar-nav">
+            <a href="#" class="sidebar-nav-item sidebar-nav-item-active">
+              <span class="material-symbols-outlined">dashboard</span>
+              Dashboard
+            </a>
+            <a href="#" class="sidebar-nav-item">
+              <span class="material-symbols-outlined">analytics</span>
+              Relatórios
+            </a>
+            <a href="#" class="sidebar-nav-item">
+              <span class="material-symbols-outlined">sensors</span>
+              Sensores PCA
+            </a>
+            <a href="#" class="sidebar-nav-item">
+              <span class="material-symbols-outlined">history</span>
+              Histórico
+            </a>
+          </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="central-main central-main-padded">
+          <!-- Header Section -->
+          <section class="section-header">
+            <div class="section-header-left">
+              <h1 class="page-title">
+                Monitoramento em Tempo Real
+              </h1>
+              <p class="page-location">
+                <span
+                  class="material-symbols-outlined page-location-icon"
+                >
+                  location_on
+                </span>
+                Sala de Espera - Oncologia (Setor 04)
+              </p>
+            </div>
+            <div class="section-header-right">
+              <div class="last-update-card">
+                <span class="last-update-label">
+                  Última Atualiz.
+                </span>
+                <span class="last-update-time">
+                  14:45:02
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Dashboard Grid -->
+          <section class="dashboard-grid">
+            <!-- Main Sector Card -->
+            <article class="card occupancy-main-card">
+              <div>
+                <p class="occupancy-label">
+                  Pessoas no Setor
+                </p>
+                <div class="occupancy-count-row">
+                  <span class="occupancy-count">
+                    18
+                  </span>
+                  <span class="occupancy-max">
+                    / 25
+                  </span>
+                </div>
+              </div>
+              <div class="occupancy-meter">
+                <div class="occupancy-meter-row">
+                  <span class="occupancy-meter-label">
+                    Nível de Ocupação
+                  </span>
+                  <span class="occupancy-meter-value">
+                    72%
+                  </span>
+                </div>
+                <div class="occupancy-meter-bar">
+                  <div
+                    class="occupancy-meter-segment occupancy-meter-green"
+                    style="width: 50%"
+                  ></div>
+                  <div
+                    class="occupancy-meter-segment occupancy-meter-yellow"
+                    style="width: 22%"
+                  ></div>
+                </div>
+                <p class="occupancy-warning">
+                  <span
+                    class="material-symbols-outlined occupancy-warning-icon"
+                  >
+                    warning
+                  </span>
+                  Proporção crítica detectada
+                </p>
+              </div>
+            </article>
+
+            <!-- Real-time Graph (Last 60min) -->
+            <article class="card occupancy-flow-card">
+              <div class="card-header">
+                <h3 class="graph-title">
+                  <span class="material-symbols-outlined graph-title-icon">
+                    timeline
+                  </span>
+                  Fluxo de Ocupação (60 min)
+                </h3>
+                <div class="graph-badges">
+                  <span class="graph-badge graph-badge-red">
+                    <span class="graph-badge-dot graph-badge-dot-red"></span>
+                    Crítico
+                  </span>
+                  <span class="graph-badge graph-badge-yellow">
+                    <span
+                      class="graph-badge-dot graph-badge-dot-yellow"
+                    ></span>
+                    Alerta
+                  </span>
+                </div>
+              </div>
+              <div class="flow-chart">
+                <!-- bands -->
+                <div class="flow-chart-bands">
+                  <div class="flow-band flow-band-critical"></div>
+                  <div class="flow-band flow-band-warning"></div>
+                  <div class="flow-band flow-band-normal"></div>
+                </div>
+                <!-- grid pattern is via CSS class -->
+                <div class="flow-chart-inner chart-grid">
+                  <svg
+                    class="flow-chart-line"
+                    preserveAspectRatio="none"
+                  >
+                    <path
+                      d="M0 100 Q 50 80, 100 110 T 200 70 T 300 90 T 400 50 T 500 40 T 600 60 T 700 30 T 800 50"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                      vector-effect="non-scaling-stroke"
+                    ></path>
+                    <circle
+                      cx="80%"
+                      cy="30"
+                      r="4"
+                      fill="currentColor"
+                    ></circle>
+                  </svg>
+                </div>
+              </div>
+              <div class="flow-chart-xlabels">
+                <span>13:45</span>
+                <span>14:00</span>
+                <span>14:15</span>
+                <span>14:30</span>
+                <span>AGORA</span>
+              </div>
+            </article>
+
+            <!-- Permanence Delta Graph -->
+            <article class="card permanence-card">
+              <div class="card-header">
+                <h3 class="card-title-sm">
+                  Permanência em Pico
+                </h3>
+                <span
+                  class="material-symbols-outlined info-icon"
+                  title="Tempo médio de permanência durante alta ocupação"
+                >
+                  info
+                </span>
+              </div>
+              <div class="permanence-bars">
+                <div
+                  class="permanence-bar permanence-bar-soft h-40"
+                  title="Delta: 450s"
+                ></div>
+                <div
+                  class="permanence-bar permanence-bar-mid h-60"
+                  title="Delta: 680s"
+                ></div>
+                <div
+                  class="permanence-bar permanence-bar-strong h-85"
+                  title="Delta: 1120s"
+                ></div>
+                <div
+                  class="permanence-bar permanence-bar-full h-95"
+                  title="Delta: 1240s"
+                ></div>
+              </div>
+              <div class="permanence-footer">
+                <p class="permanence-caption">
+                  Média de estadia em lotação:
+                </p>
+                <p class="permanence-value">
+                  1.240 <span class="permanence-unit">segundos</span>
+                </p>
+              </div>
+            </article>
+
+            <!-- Correlation Panel -->
+            <article class="card correlation-card">
+              <h3 class="card-title-sm mb-4">
+                Correlação Ambiental
+              </h3>
+              <div class="correlation-wrapper">
+                <div class="correlation-sync-line"></div>
+
+                <div class="correlation-row">
+                  <div class="correlation-label">
+                    CO2 (ppm)
+                  </div>
+                  <div class="correlation-track">
+                    <svg
+                      class="correlation-svg"
+                      preserveAspectRatio="none"
+                    >
+                      <path
+                        d="M0 20 L50 18 L100 22 L150 15 L200 10 L250 5 L300 8"
+                        fill="none"
+                        stroke="#10b981"
+                        stroke-width="2"
+                        vector-effect="non-scaling-stroke"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div class="correlation-value">840</div>
+                </div>
+
+                <div class="correlation-row">
+                  <div class="correlation-label">
+                    Humid (%)
+                  </div>
+                  <div class="correlation-track">
+                    <svg
+                      class="correlation-svg"
+                      preserveAspectRatio="none"
+                    >
+                      <path
+                        d="M0 10 L50 12 L100 10 L150 11 L200 14 L250 18 L300 20"
+                        fill="none"
+                        stroke="#3b82f6"
+                        stroke-width="2"
+                        vector-effect="non-scaling-stroke"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div class="correlation-value">52%</div>
+                </div>
+
+                <div class="correlation-row">
+                  <div class="correlation-label">
+                    Temp (°C)
+                  </div>
+                  <div class="correlation-track">
+                    <svg
+                      class="correlation-svg"
+                      preserveAspectRatio="none"
+                    >
+                      <path
+                        d="M0 15 L50 15 L100 14 L150 14 L200 16 L250 19 L300 21"
+                        fill="none"
+                        stroke="#ef4444"
+                        stroke-width="2"
+                        vector-effect="non-scaling-stroke"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div class="correlation-value">23.5</div>
+                </div>
+              </div>
+            </article>
+
+            <!-- Action Suggestions -->
+            <section class="actions-column">
+              <article class="action-card-primary">
+                <div class="action-card-header">
+                  <span class="material-symbols-outlined action-icon">
+                    auto_fix
+                  </span>
+                  <span class="action-label">
+                    Ações Sugeridas
+                  </span>
+                </div>
+                <p class="action-text">
+                  Lotação alta detectada.
+                  <span class="action-text-strong">
+                    Ativar ventilação forçada
+                  </span>
+                  em 10 min para controle de CO2.
+                </p>
+                <button class="action-button">
+                  Executar Agora
+                </button>
+              </article>
+
+              <article class="action-card-secondary">
+                <div class="action-secondary-header">
+                  <span
+                    class="material-symbols-outlined action-secondary-icon"
+                  >
+                    cleaning_services
+                  </span>
+                  <span class="action-secondary-label">
+                    Manutenção
+                  </span>
+                </div>
+                <p class="action-secondary-text">
+                  Programar limpeza rápida após dispersão de fluxo
+                  (estimado 15:30).
+                </p>
+              </article>
+            </section>
+          </section>
+
+          <!-- Detailed Table / Alerts -->
+          <section class="card events-card">
+            <div class="events-header">
+              <h3 class="events-title">
+                Eventos Recentes do Sensor PCA
+              </h3>
+              <button class="events-link">
+                Ver todos
+                <span
+                  class="material-symbols-outlined events-link-icon"
+                >
+                  chevron_right
+                </span>
+              </button>
+            </div>
+            <div class="table-wrapper">
+              <table class="table table-compact">
+                <thead class="events-table-head">
+                  <tr>
+                    <th>Horário</th>
+                    <th>Evento</th>
+                    <th>Ocupação</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="table-row">
+                    <td class="events-time">
+                      14:42:15
+                    </td>
+                    <td>
+                      Entrada Detectada (2 pessoas)
+                    </td>
+                    <td>
+                      18/25
+                    </td>
+                    <td>
+                      <span class="badge badge-warning">
+                        ALERTA
+                      </span>
+                    </td>
+                  </tr>
+                  <tr class="table-row">
+                    <td class="events-time">
+                      14:38:10
+                    </td>
+                    <td>
+                      Saída Detectada (1 pessoa)
+                    </td>
+                    <td>
+                      16/25
+                    </td>
+                    <td>
+                      <span class="badge badge-success">
+                        NORMAL
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="pt-BR" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Monitoramento de Qualidade do Ar Hospitalar</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="page">
+    <div class="layout-root">
+      <div class="layout-container">
+        <!-- Top Navigation Bar -->
+        <header class="topbar">
+          <div class="topbar-left">
+            <div class="brand-icon-wrapper">
+              <span class="material-symbols-outlined brand-icon">
+                health_metrics
+              </span>
+            </div>
+            <div>
+              <h2 class="topbar-title">HospitaLog AI</h2>
+              <p class="topbar-subtitle">
+                Monitoramento de Qualidade Ambiental
+              </p>
+            </div>
+          </div>
+
+          <div class="topbar-right">
+            <button class="icon-button icon-button-soft-primary">
+              <span class="material-symbols-outlined topbar-icon-md">
+                notifications
+              </span>
+            </button>
+            <button class="icon-button icon-button-soft-primary">
+              <span class="material-symbols-outlined topbar-icon-md">
+                settings
+              </span>
+            </button>
+            <div class="topbar-divider"></div>
+            <div class="topbar-user">
+              <div class="user-meta">
+                <p class="user-name">Dr. Ricardo Silva</p>
+                <p class="user-role user-role-small">
+                  Gestor Técnico
+                </p>
+              </div>
+              <div class="user-avatar user-avatar-strong">
+                <span class="material-symbols-outlined user-avatar-icon">
+                  account_circle
+                </span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main class="central-main central-main-narrow">
+          <!-- Page Header & Filters -->
+          <section class="page-header-filters">
+            <div class="page-header-text">
+              <h1 class="page-title">
+                Análise de Tendências Multi-sensor
+              </h1>
+              <p class="page-subtitle">
+                Correlação temporal e conformidade regulatória (ANVISA/ABNT)
+              </p>
+            </div>
+
+            <div class="page-filters">
+              <!-- Ambiente -->
+              <div class="filter-field">
+                <label class="filter-label">Ambiente</label>
+                <select class="select-ambient">
+                  <option>UTI Adulto - Ala A</option>
+                  <option>Enfermaria 4º Andar</option>
+                  <option>Centro Cirúrgico 02</option>
+                  <option>Laboratório Clínico</option>
+                </select>
+              </div>
+
+              <!-- Período -->
+              <div class="filter-field">
+                <label class="filter-label">Período</label>
+                <div class="period-toggle">
+                  <button class="period-btn period-btn-active">
+                    24h
+                  </button>
+                  <button class="period-btn">7d</button>
+                  <button class="period-btn">30d</button>
+                </div>
+              </div>
+
+              <!-- Export -->
+              <div class="filter-field filter-field-end">
+                <button class="primary-action-button export-button">
+                  <span class="material-symbols-outlined primary-action-icon">
+                    picture_as_pdf
+                  </span>
+                  Gerar Relatório PDF
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- KPI Quick Overview -->
+          <section class="kpi-grid kpi-grid-equal mb-8">
+            <div class="kpi-card kpi-card-soft">
+              <div class="kpi-header kpi-header-tight">
+                <span class="kpi-label">Média CO2</span>
+                <span class="kpi-chip kpi-chip-down">
+                  <span class="material-symbols-outlined kpi-chip-icon">
+                    trending_down
+                  </span>
+                  -12%
+                </span>
+              </div>
+              <div class="kpi-value-row">
+                <span class="kpi-value">540</span>
+                <span class="kpi-unit">ppm</span>
+              </div>
+            </div>
+
+            <div class="kpi-card kpi-card-soft">
+              <div class="kpi-header kpi-header-tight">
+                <span class="kpi-label">Média VOC</span>
+                <span class="kpi-chip kpi-chip-up-amber">
+                  <span class="material-symbols-outlined kpi-chip-icon">
+                    trending_up
+                  </span>
+                  +4%
+                </span>
+              </div>
+              <div class="kpi-value-row">
+                <span class="kpi-value">180</span>
+                <span class="kpi-unit">ppb</span>
+              </div>
+            </div>
+
+            <div class="kpi-card kpi-card-soft">
+              <div class="kpi-header kpi-header-tight">
+                <span class="kpi-label">Temperatura</span>
+                <span class="kpi-chip kpi-chip-stable">
+                  <span class="material-symbols-outlined kpi-chip-icon">
+                    horizontal_rule
+                  </span>
+                  0%
+                </span>
+              </div>
+              <div class="kpi-value-row">
+                <span class="kpi-value">22.4</span>
+                <span class="kpi-unit">°C</span>
+              </div>
+            </div>
+
+            <div class="kpi-card kpi-card-soft">
+              <div class="kpi-header kpi-header-tight">
+                <span class="kpi-label">Umidade</span>
+                <span class="kpi-chip kpi-chip-down">
+                  <span class="material-symbols-outlined kpi-chip-icon">
+                    trending_down
+                  </span>
+                  -2%
+                </span>
+              </div>
+              <div class="kpi-value-row">
+                <span class="kpi-value">48.2</span>
+                <span class="kpi-unit">%</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Main Graphs Section -->
+          <section class="graphs-grid mb-8">
+            <!-- Temporal Correlation Graph -->
+            <div class="card graph-card graph-card-wide">
+              <div class="graph-header">
+                <h3 class="graph-title">
+                  <span class="material-symbols-outlined graph-title-icon">
+                    timeline
+                  </span>
+                  Correlação Temporal Multi-Variável
+                </h3>
+                <div class="graph-legend">
+                  <div class="graph-legend-item">
+                    <span class="graph-dot graph-dot-primary"></span>
+                    <span class="graph-legend-label">CO2</span>
+                  </div>
+                  <div class="graph-legend-item">
+                    <span class="graph-dot graph-dot-emerald"></span>
+                    <span class="graph-legend-label">Temp</span>
+                  </div>
+                  <div class="graph-legend-item">
+                    <span class="graph-dot graph-dot-amber"></span>
+                    <span class="graph-legend-label">VOC</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="graph-timeline">
+                <!-- fundo com linhas -->
+                <div class="graph-timeline-bg">
+                  <svg
+                    class="graph-timeline-svg"
+                    viewBox="0 0 100 40"
+                    preserveAspectRatio="none"
+                  >
+                    <!-- CO2 -->
+                    <path
+                      d="M0 30 Q 10 20, 20 25 T 40 15 T 60 20 T 80 10 T 100 15"
+                      fill="none"
+                      stroke="#136dec"
+                      stroke-width="0.5"
+                    ></path>
+                    <!-- Temp -->
+                    <path
+                      d="M0 25 Q 15 28, 30 22 T 50 25 T 75 24 T 100 26"
+                      fill="none"
+                      stroke="#10b981"
+                      stroke-width="0.5"
+                    ></path>
+                    <!-- Markers -->
+                    <line
+                      x1="45"
+                      y1="0"
+                      x2="45"
+                      y2="40"
+                      stroke="#f43f5e"
+                      stroke-width="0.5"
+                      stroke-dasharray="2"
+                    ></line>
+                    <line
+                      x1="75"
+                      y1="0"
+                      x2="75"
+                      y2="40"
+                      stroke="#136dec"
+                      stroke-width="0.5"
+                      stroke-dasharray="2"
+                    ></line>
+                  </svg>
+                </div>
+
+                <!-- balões de marcação -->
+                <div class="graph-marker graph-marker-1">
+                  <span class="graph-marker-label graph-marker-label-rose">
+                    ALERTA: PICO VOC
+                  </span>
+                  <div class="graph-marker-line graph-marker-line-rose"></div>
+                </div>
+                <div class="graph-marker graph-marker-2">
+                  <span class="graph-marker-label graph-marker-label-primary">
+                    INSPEÇÃO SANITÁRIA
+                  </span>
+                  <div
+                    class="graph-marker-line graph-marker-line-primary"
+                  ></div>
+                </div>
+
+                <!-- eixo tempo -->
+                <div class="graph-timeline-xlabels">
+                  <span>00:00</span>
+                  <span>04:00</span>
+                  <span>08:00</span>
+                  <span>12:00</span>
+                  <span>16:00</span>
+                  <span>20:00</span>
+                  <span>23:59</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Scatter Plot -->
+            <div class="card graph-card">
+              <div class="graph-header">
+                <div>
+                  <h3 class="graph-title">
+                    <span class="material-symbols-outlined graph-title-icon">
+                      bubble_chart
+                    </span>
+                    CO2 vs Umidade
+                  </h3>
+                  <p class="graph-caption">
+                    Cor: Range de VOC (Pobre a Ótimo)
+                  </p>
+                </div>
+              </div>
+
+              <div class="scatter-plot">
+                <!-- pontos -->
+                <div class="scatter-dot dot-1"></div>
+                <div class="scatter-dot dot-2"></div>
+                <div class="scatter-dot dot-3"></div>
+                <div class="scatter-dot dot-4"></div>
+                <div class="scatter-dot dot-5"></div>
+                <div class="scatter-dot dot-6"></div>
+                <div class="scatter-dot dot-7"></div>
+                <div class="scatter-dot dot-8"></div>
+                <div class="scatter-dot dot-9"></div>
+
+                <!-- eixos -->
+                <span class="scatter-x-label">
+                  Umidade (%)
+                </span>
+                <span class="scatter-y-label">
+                  CO2 (ppm)
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Compliance Table -->
+          <section class="card compliance-card">
+            <div class="compliance-header">
+              <h3 class="compliance-title">
+                <span class="material-symbols-outlined graph-title-icon">
+                  verified
+                </span>
+                Relatório de Conformidade Regulatória
+              </h3>
+              <div class="compliance-badges">
+                <span class="compliance-chip">
+                  <span class="material-symbols-outlined compliance-chip-icon">
+                    check_circle
+                  </span>
+                  92% COMPLIANCE GLOBAL
+                </span>
+              </div>
+            </div>
+
+            <div class="table-wrapper">
+              <table class="table table-compact">
+                <thead>
+                  <tr class="table-head-row table-head-soft">
+                    <th>Variável Ambiental</th>
+                    <th>Padrão Requerido</th>
+                    <th>Tempo em Conformidade</th>
+                    <th>Desvio Máx. Detectado</th>
+                    <th>Critério Diário</th>
+                    <th class="table-head-actions">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="table-row">
+                    <td class="table-cell-main">
+                      Temperatura (ºC)
+                    </td>
+                    <td class="table-cell-sub">
+                      21.0 - 24.0 °C
+                    </td>
+                    <td>
+                      <div class="compliance-bar-row">
+                        <div class="compliance-bar-track">
+                          <div
+                            class="compliance-bar-fill compliance-bar-fill-ok"
+                            style="width: 98%"
+                          ></div>
+                        </div>
+                        <span class="compliance-bar-text">98%</span>
+                      </div>
+                    </td>
+                    <td class="compliance-value-ok">
+                      24.1 °C
+                    </td>
+                    <td>Shift 1, 2, 3</td>
+                    <td class="table-cell-actions">
+                      <span
+                        class="material-symbols-outlined compliance-icon-ok"
+                      >
+                        check_circle
+                      </span>
+                    </td>
+                  </tr>
+
+                  <tr class="table-row">
+                    <td class="table-cell-main">
+                      Umidade Relativa (%)
+                    </td>
+                    <td class="table-cell-sub">
+                      40.0 - 60.0 %
+                    </td>
+                    <td>
+                      <div class="compliance-bar-row">
+                        <div class="compliance-bar-track">
+                          <div
+                            class="compliance-bar-fill compliance-bar-fill-ok"
+                            style="width: 92%"
+                          ></div>
+                        </div>
+                        <span class="compliance-bar-text">92%</span>
+                      </div>
+                    </td>
+                    <td class="compliance-value-warn">
+                      64.5 %
+                    </td>
+                    <td>Semanal</td>
+                    <td class="table-cell-actions">
+                      <span
+                        class="material-symbols-outlined compliance-icon-ok"
+                      >
+                        check_circle
+                      </span>
+                    </td>
+                  </tr>
+
+                  <tr class="table-row">
+                    <td class="table-cell-main">
+                      Dióxido de Carbono (CO2)
+                    </td>
+                    <td class="table-cell-sub">
+                      &lt; 1000 ppm
+                    </td>
+                    <td>
+                      <div class="compliance-bar-row">
+                        <div class="compliance-bar-track">
+                          <div
+                            class="compliance-bar-fill compliance-bar-fill-ok"
+                            style="width: 85%"
+                          ></div>
+                        </div>
+                        <span class="compliance-bar-text">85%</span>
+                      </div>
+                    </td>
+                    <td class="compliance-value-bad">
+                      1150 ppm
+                    </td>
+                    <td>Diário</td>
+                    <td class="table-cell-actions">
+                      <span
+                        class="material-symbols-outlined compliance-icon-bad"
+                      >
+                        cancel
+                      </span>
+                    </td>
+                  </tr>
+
+                  <tr class="table-row">
+                    <td class="table-cell-main">
+                      Compostos Orgânicos (VOC)
+                    </td>
+                    <td class="table-cell-sub">
+                      &lt; 300 ppb
+                    </td>
+                    <td>
+                      <div class="compliance-bar-row">
+                        <div class="compliance-bar-track">
+                          <div
+                            class="compliance-bar-fill compliance-bar-fill-ok"
+                            style="width: 99%"
+                          ></div>
+                        </div>
+                        <span class="compliance-bar-text">99%</span>
+                      </div>
+                    </td>
+                    <td class="compliance-value-ok">
+                      120 ppb
+                    </td>
+                    <td>Por Evento</td>
+                    <td class="table-cell-actions">
+                      <span
+                        class="material-symbols-outlined compliance-icon-ok"
+                      >
+                        check_circle
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Footer Summary -->
+          <footer class="audit-footer">
+            <p class="audit-footer-text">
+              Última sincronização de sensores:
+              <span class="audit-footer-strong">
+                há 2 minutos
+              </span>
+            </p>
+            <div class="audit-footer-links">
+              <a href="#" class="audit-link">
+                Logs de Auditoria
+              </a>
+              <a href="#" class="audit-link">
+                Certificação Técnica
+              </a>
+              <p class="audit-copy">
+                © 2024 MedSystems Analytics
+              </p>
+            </div>
+          </footer>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

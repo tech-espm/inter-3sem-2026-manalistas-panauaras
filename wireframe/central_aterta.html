@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="pt-BR" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="styles.css" />
+
+    <title>Central de Alertas Inteligentes Hospitalares</title>
+  </head>
+  <body class="page">
+    <div class="layout-root">
+      <div class="layout-container">
+        <!-- Topbar -->
+        <header class="topbar">
+          <div class="topbar-left">
+            <div class="topbar-title-group">
+              <span class="material-symbols-outlined topbar-logo-icon">
+                medical_services
+              </span>
+              <h2 class="topbar-title">Central de Alertas</h2>
+            </div>
+
+            <label class="search-wrapper">
+              <div class="search-input-container">
+                <div class="search-icon-wrapper">
+                  <span class="material-symbols-outlined search-icon">
+                    search
+                  </span>
+                </div>
+                <input
+                  class="search-input"
+                  placeholder="Pesquisar setor ou alerta..."
+                  value=""
+                />
+              </div>
+            </label>
+          </div>
+
+          <div class="topbar-right">
+            <div class="topbar-icon-group">
+              <button class="icon-button icon-button-soft-primary">
+                <span class="material-symbols-outlined">notifications</span>
+              </button>
+              <button class="icon-button icon-button-soft-primary">
+                <span class="material-symbols-outlined">settings</span>
+              </button>
+            </div>
+            <div class="user-info">
+              <div class="user-meta">
+                <p class="user-name">Dr. Ricardo Silva</p>
+                <p class="user-role">Gestor de Operações</p>
+              </div>
+              <div class="user-avatar">
+                <span class="material-symbols-outlined user-avatar-icon">
+                  account_circle
+                </span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div class="central-layout">
+          <!-- Sidebar -->
+          <aside class="sidebar sidebar-narrow">
+            <div class="sidebar-top">
+              <div class="sidebar-hospital">
+                <h1 class="sidebar-hospital-name">Hospital Central</h1>
+                <p class="sidebar-hospital-subtitle">
+                  Gestão de Ambiente Inteligente
+                </p>
+              </div>
+              <nav class="sidebar-nav">
+                <a href="#" class="sidebar-nav-item sidebar-nav-item-active">
+                  <span class="material-symbols-outlined">dashboard</span>
+                  <span>Dashboard</span>
+                </a>
+                <a href="#" class="sidebar-nav-item">
+                  <span class="material-symbols-outlined">warning</span>
+                  <span>Alertas Ativos</span>
+                </a>
+                <a href="#" class="sidebar-nav-item">
+                  <span class="material-symbols-outlined">history</span>
+                  <span>Histórico</span>
+                </a>
+                <a href="#" class="sidebar-nav-item">
+                  <span class="material-symbols-outlined">domain</span>
+                  <span>Setores</span>
+                </a>
+                <a href="#" class="sidebar-nav-item">
+                  <span class="material-symbols-outlined">engineering</span>
+                  <span>Manutenção</span>
+                </a>
+              </nav>
+            </div>
+
+            <div class="sidebar-status-card">
+              <p class="sidebar-status-title">Status do Sistema</p>
+              <div class="sidebar-status-row">
+                <span class="status-dot status-dot-success"></span>
+                <span class="sidebar-status-text">
+                  Sensores Online: 98%
+                </span>
+              </div>
+            </div>
+          </aside>
+
+          <!-- Main -->
+          <main class="central-main">
+            <!-- KPIs -->
+            <section class="kpi-grid">
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <p class="kpi-label">Tempo de Resposta (7d)</p>
+                  <span class="material-symbols-outlined kpi-icon-primary">
+                    timer
+                  </span>
+                </div>
+                <p class="kpi-value">12 min</p>
+                <div class="kpi-trend kpi-trend-down">
+                  <span class="material-symbols-outlined kpi-trend-icon">
+                    trending_down
+                  </span>
+                  <p class="kpi-trend-text">-2% vs sem. anterior</p>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <p class="kpi-label">Resolvidos no SLA</p>
+                  <span class="material-symbols-outlined kpi-icon-primary">
+                    verified
+                  </span>
+                </div>
+                <p class="kpi-value">94.2%</p>
+                <div class="kpi-trend kpi-trend-up">
+                  <span class="material-symbols-outlined kpi-trend-icon">
+                    trending_up
+                  </span>
+                  <p class="kpi-trend-text">+5.1% vs meta</p>
+                </div>
+              </div>
+
+              <div class="kpi-card">
+                <div class="kpi-header">
+                  <p class="kpi-label">Setores Críticos</p>
+                  <span class="material-symbols-outlined kpi-icon-primary">
+                    priority_high
+                  </span>
+                </div>
+                <p class="kpi-value">UTI 2, Ala B</p>
+                <p class="kpi-subtext">Baseado em incidência</p>
+              </div>
+
+              <div class="kpi-card">
+                <p class="kpi-label mb-2">Alertas vs Resolução</p>
+                <div class="bar-mini-chart">
+                  <div class="bar-mini bar-mini-soft h-40"></div>
+                  <div class="bar-mini h-80"></div>
+                  <div class="bar-mini bar-mini-soft h-50"></div>
+                  <div class="bar-mini h-90"></div>
+                  <div class="bar-mini h-60"></div>
+                  <div class="bar-mini bar-mini-soft h-30"></div>
+                  <div class="bar-mini h-75"></div>
+                </div>
+                <p class="bar-mini-legend">
+                  Últimos 7 dias (M-T-Q-Q-S-S-D)
+                </p>
+              </div>
+            </section>
+
+            <!-- Tabela de alertas -->
+            <section class="card alerts-card">
+              <div class="alerts-header">
+                <div class="alerts-filters">
+                  <button class="filter-chip">
+                    <span class="material-symbols-outlined filter-chip-icon">
+                      filter_alt
+                    </span>
+                    Filtrar Setor
+                    <span class="material-symbols-outlined filter-chip-icon">
+                      expand_more
+                    </span>
+                  </button>
+                  <button class="filter-chip">
+                    Tipo de Problema
+                    <span class="material-symbols-outlined filter-chip-icon">
+                      expand_more
+                    </span>
+                  </button>
+                  <button class="filter-chip">
+                    Gravidade
+                    <span class="material-symbols-outlined filter-chip-icon">
+                      expand_more
+                    </span>
+                  </button>
+                  <button class="filter-chip">
+                    Status
+                    <span class="material-symbols-outlined filter-chip-icon">
+                      expand_more
+                    </span>
+                  </button>
+                </div>
+                <button class="primary-action-button">
+                  <span class="material-symbols-outlined primary-action-icon">
+                    cleaning_services
+                  </span>
+                  Novo Ticket de Manutenção
+                </button>
+              </div>
+
+              <div class="table-wrapper">
+                <table class="table">
+                  <thead>
+                    <tr class="table-head-row">
+                      <th>Data/Hora</th>
+                      <th>Ambiente</th>
+                      <th>Tipo Alerta</th>
+                      <th>Gravidade</th>
+                      <th>SLA (Restante)</th>
+                      <th>Status</th>
+                      <th class="table-head-actions">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="table-row">
+                      <td>
+                        <p class="table-cell-main">Hoje, 14:22</p>
+                      </td>
+                      <td>
+                        <p class="table-cell-main">UTI 2 - Leito 04</p>
+                      </td>
+                      <td>
+                        <div class="table-tag-with-text">
+                          <span class="tag tag-amber">CO2</span>
+                          <p class="tag-caption">Nível Elevado</p>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="severity severity-critical">
+                          <span class="material-symbols-outlined severity-icon">
+                            error
+                          </span>
+                          <span class="severity-label">Crítico</span>
+                        </div>
+                      </td>
+                      <td>
+                        <p class="sla-time sla-time-critical">
+                          04m 12s
+                        </p>
+                      </td>
+                      <td>
+                        <span class="status-pill status-pill-info">
+                          Em Progresso
+                        </span>
+                      </td>
+                      <td class="table-cell-actions">
+                        <button class="icon-button-ghost">
+                          <span class="material-symbols-outlined">
+                            visibility
+                          </span>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr class="table-row table-row-critical">
+                      <td>
+                        <p class="table-cell-main">Hoje, 14:15</p>
+                      </td>
+                      <td>
+                        <p class="table-cell-main">Ala B - Corredor</p>
+                      </td>
+                      <td>
+                        <div class="table-tag-with-text">
+                          <span class="tag tag-purple">
+                            Superlotação
+                          </span>
+                          <p class="tag-caption">Bloqueio Via</p>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="severity severity-critical">
+                          <span class="material-symbols-outlined severity-icon">
+                            error
+                          </span>
+                          <span class="severity-label">Crítico</span>
+                        </div>
+                      </td>
+                      <td>
+                        <p class="sla-time sla-time-expired">
+                          Expirado
+                        </p>
+                      </td>
+                      <td>
+                        <span class="status-pill status-pill-danger">
+                          Aberto
+                        </span>
+                      </td>
+                      <td class="table-cell-actions">
+                        <button class="icon-button-ghost">
+                          <span class="material-symbols-outlined">
+                            visibility
+                          </span>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr class="table-row">
+                      <td>
+                        <p class="table-cell-main">Hoje, 13:58</p>
+                      </td>
+                      <td>
+                        <p class="table-cell-main">Farmácia Central</p>
+                      </td>
+                      <td>
+                        <div class="table-tag-with-text">
+                          <span class="tag tag-blue">
+                            Temperatura
+                          </span>
+                          <p class="tag-caption">+4.2°C</p>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="severity severity-warning">
+                          <span class="material-symbols-outlined severity-icon">
+                            warning
+                          </span>
+                          <span class="severity-label">Alerta</span>
+                        </div>
+                      </td>
+                      <td>
+                        <p class="sla-time sla-time-neutral">
+                          12m 45s
+                        </p>
+                      </td>
+                      <td>
+                        <span class="status-pill status-pill-success">
+                          Resolvido
+                        </span>
+                      </td>
+                      <td class="table-cell-actions">
+                        <button class="icon-button-ghost">
+                          <span class="material-symbols-outlined">
+                            visibility
+                          </span>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="alerts-footer">
+                <p class="alerts-footer-text">
+                  Mostrando 3 de 128 alertas nas últimas 24h
+                </p>
+                <div class="alerts-pagination">
+                  <button class="pagination-button">
+                    <span class="material-symbols-outlined pagination-icon">
+                      chevron_left
+                    </span>
+                  </button>
+                  <button class="pagination-button">
+                    <span class="material-symbols-outlined pagination-icon">
+                      chevron_right
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <!-- Gráfico + Ações rápidas -->
+            <section class="detail-grid">
+              <div class="card sensor-detail-card">
+                <div class="detail-badge-wrapper">
+                  <span class="detail-badge">
+                    Vista de Detalhe Ativa
+                  </span>
+                </div>
+                <h3 class="detail-title">
+                  <span class="material-symbols-outlined detail-title-icon">
+                    analytics
+                  </span>
+                  Curva do Sensor: CO2 (UTI 2 - Leito 04)
+                </h3>
+
+                <div class="sensor-chart">
+                  <div class="sensor-threshold">
+                    <span class="sensor-threshold-label">
+                      LIMITE CRÍTICO
+                    </span>
+                  </div>
+
+                  <div class="sensor-bar sensor-bar-soft h-35"></div>
+                  <div class="sensor-bar sensor-bar-soft h-32"></div>
+                  <div class="sensor-bar sensor-bar-soft h-38"></div>
+                  <div class="sensor-bar sensor-bar-soft h-42"></div>
+                  <div class="sensor-bar sensor-bar-critical h-75"></div>
+                  <div class="sensor-bar sensor-bar-critical h-85"></div>
+                  <div class="sensor-bar sensor-bar-critical-soft h-65"></div>
+                  <div class="sensor-bar sensor-bar-soft h-55"></div>
+                  <div class="sensor-bar sensor-bar-soft h-40"></div>
+                  <div class="sensor-bar sensor-bar-soft h-35"></div>
+                </div>
+
+                <div class="sensor-chart-legend">
+                  <span>13:00</span>
+                  <span>13:30</span>
+                  <span class="sensor-chart-legend-highlight">
+                    14:00 (Início Alerta)
+                  </span>
+                  <span>14:30</span>
+                  <span>Agora</span>
+                </div>
+
+                <div class="detail-bottom-grid">
+                  <div class="detail-logs">
+                    <h4 class="detail-subtitle">
+                      Logs de Intervenção
+                    </h4>
+                    <div class="detail-log-list">
+                      <div class="detail-log-item">
+                        <div class="detail-log-line"></div>
+                        <div>
+                          <p class="detail-log-title">
+                            14:22 - Equipe de Manutenção Acionada
+                          </p>
+                          <p class="detail-log-text">
+                            Verificação de exaustão mecânica iniciada.
+                          </p>
+                        </div>
+                      </div>
+                      <div class="detail-log-item">
+                        <div class="detail-log-line"></div>
+                        <div>
+                          <p class="detail-log-title">
+                            14:05 - Notificação enviada à Enfermagem
+                          </p>
+                          <p class="detail-log-text">
+                            Confirmação de recebimento: Enf. Marcos.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="detail-responsible">
+                    <h4 class="detail-subtitle">
+                      Responsável Atual
+                    </h4>
+                    <div class="detail-responsible-row">
+                      <div class="detail-responsible-avatar">
+                        <span
+                          class="material-symbols-outlined detail-responsible-icon"
+                        >
+                          person
+                        </span>
+                      </div>
+                      <div>
+                        <p class="detail-responsible-name">
+                          Eng. Carla Mendes
+                        </p>
+                        <p class="detail-responsible-role">
+                          Engenharia Clínica / Manutenção
+                        </p>
+                      </div>
+                    </div>
+                    <button class="detail-transfer-button">
+                      Transferir Responsabilidade
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card quick-actions-card">
+                <h3 class="quick-actions-title">Ações Rápidas</h3>
+                <div class="quick-actions-list">
+                  <button class="quick-action quick-action-primary">
+                    <div class="quick-action-left">
+                      <div class="quick-action-icon primary">
+                        <span class="material-symbols-outlined">
+                          cleaning_services
+                        </span>
+                      </div>
+                      <div class="quick-action-text">
+                        <p class="quick-action-title">
+                          Ticket de Limpeza
+                        </p>
+                        <p class="quick-action-subtitle">
+                          Acionamento imediato
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      class="material-symbols-outlined quick-action-arrow"
+                    >
+                      chevron_right
+                    </span>
+                  </button>
+
+                  <button class="quick-action">
+                    <div class="quick-action-left">
+                      <div class="quick-action-icon neutral">
+                        <span class="material-symbols-outlined">
+                          build
+                        </span>
+                      </div>
+                      <div class="quick-action-text">
+                        <p class="quick-action-title">
+                          Ticket de Manutenção
+                        </p>
+                        <p class="quick-action-subtitle">
+                          Elétrica, Ar e Estrutural
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      class="material-symbols-outlined quick-action-arrow"
+                    >
+                      chevron_right
+                    </span>
+                  </button>
+
+                  <button class="quick-action">
+                    <div class="quick-action-left">
+                      <div class="quick-action-icon neutral">
+                        <span class="material-symbols-outlined">
+                          security
+                        </span>
+                      </div>
+                      <div class="quick-action-text">
+                        <p class="quick-action-title">
+                          Chamada de Segurança
+                        </p>
+                        <p class="quick-action-subtitle">
+                          Apoio em intercorrências
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      class="material-symbols-outlined quick-action-arrow"
+                    >
+                      chevron_right
+                    </span>
+                  </button>
+
+                  <div class="integrations-card">
+                    <p class="integrations-title">
+                      SISTEMAS INTEGRADOS
+                    </p>
+                    <div class="integrations-tags">
+                      <span class="integration-tag">HIS v4.2</span>
+                      <span class="integration-tag">SCADA</span>
+                      <span class="integration-tag">BMS Cloud</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </main>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
