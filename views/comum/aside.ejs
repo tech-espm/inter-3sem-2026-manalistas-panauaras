@@ -1,0 +1,48 @@
+<aside class="sidebar sidebar-narrow">
+  <div class="sidebar-top">
+    <div class="sidebar-hospital">
+      <h1 class="sidebar-hospital-name">Hospital Central</h1>
+      <p class="sidebar-hospital-subtitle">
+        Gestão de Ambiente Inteligente
+      </p>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/"
+        class="sidebar-nav-item <%= (typeof pagina !== 'undefined' && pagina === 'dashboard') ? 'sidebar-nav-item-active' : '' %>">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span>Dashboard</span>
+      </a>
+      <a href="/alertas"
+        class="sidebar-nav-item <%= (typeof pagina !== 'undefined' && pagina === 'alertas') ? 'sidebar-nav-item-active' : '' %>">
+        <span class="material-symbols-outlined">warning</span>
+        <span>Central de Alertas</span>
+      </a>
+      <a href="/ocupacao"
+        class="sidebar-nav-item <%= (typeof pagina !== 'undefined' && pagina === 'ocupacao') ? 'sidebar-nav-item-active' : '' %>">
+        <span class="material-symbols-outlined">history</span>
+        <span>Fluxo de Ocupação</span>
+      </a>
+      <a href="/tendencia"
+        class="sidebar-nav-item <%= (typeof pagina !== 'undefined' && pagina === 'tendencia') ? 'sidebar-nav-item-active' : '' %>">
+        <span class="material-symbols-outlined">domain</span>
+        <span>Análise de Tendência</span>
+      </a>
+      <a href="/sobre"
+        class="sidebar-nav-item <%= (typeof pagina !== 'undefined' && pagina === 'sobre') ? 'sidebar-nav-item-active' : '' %>">
+        <span class="material-symbols-outlined">engineering</span>
+        <span>Sobre nós</span>
+      </a>
+    </nav>
+
+  </div>
+
+  <div class="sidebar-status-card">
+    <p class="sidebar-status-title">Status do Sistema</p>
+    <div class="sidebar-status-row">
+      <span class="status-dot status-dot-success"></span>
+      <span class="sidebar-status-text">
+        Sensores Online: 98%
+      </span>
+    </div>
+  </div>
+</aside>

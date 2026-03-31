@@ -1,0 +1,35 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-br">
+<head>
+	<%- include("comum/cabecalho") %>
+
+	<%- defineContent("espaco-head") %>
+</head>
+<body>
+
+	<div class="limitador container-fluid"> <!-- container-fluid garante que ocupa a largura toda -->
+
+    <%- include("comum/barra") %>
+
+    <!-- Trocamos a classe 'conteudo' por 'row' -->
+    <div class="row">
+
+        <!-- O aside agora é uma coluna (ex: ocupa 3 de 12 partes) -->
+        <div class="col-md-3 col-lg-2 bg-light"> 
+            <%- include("comum/aside") %>
+        </div>
+
+        <!-- O corpo ocupa o resto do espaço (ex: 9 ou 10 partes) -->
+        <main class="col-md-9 col-lg-10">
+            <%- body %>
+        </main>
+
+    </div>
+
+    <%- include("comum/rodape") %>
+	<%- defineContent("espaco-rodape") %>
+
+</div>
+
+</body>
+</html>
