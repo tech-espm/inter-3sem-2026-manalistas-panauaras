@@ -242,6 +242,8 @@ html.dark .topbar {
   font-weight: 700;
 }
 
+
+
 .topbar-subtitle {
   margin: 0;
   font-size: 0.75rem;
@@ -394,6 +396,14 @@ html.dark .card {
   margin: 0;
   font-size: 0.875rem;
   font-weight: 700;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 800; /* Extra bold para destacar mesmo sendo pequeno */
+  text-transform: uppercase; /* Opcional: ajuda na leitura de fontes pequenas */
+  letter-spacing: 0.05em;
 }
 
 .card-subtitle {
@@ -1759,6 +1769,9 @@ html.dark .table-row-critical {
 }
 
 .table-row td {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+    font-size: 0.85rem;
   padding: 1rem 1.5rem;
   border-top: 1px solid var(--color-slate-100);
 }
