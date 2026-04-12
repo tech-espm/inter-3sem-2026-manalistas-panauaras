@@ -1,4 +1,3 @@
-
     <div class="layout-root">
       <div class="layout-container">
         <!-- Top Navigation Bar -->
@@ -61,11 +60,8 @@
               <!-- Ambiente -->
               <div class="filter-field">
                 <label class="filter-label">Ambiente</label>
-                <select class="select-ambient">
-                  <option>UTI Adulto - Ala A</option>
-                  <option>Enfermaria 4º Andar</option>
-                  <option>Centro Cirúrgico 02</option>
-                  <option>Laboratório Clínico</option>
+                <select id="selectAmbiente" class="select-ambient">
+                  <option value="">Todos os Ambientes</option>
                 </select>
               </div>
 
@@ -73,11 +69,9 @@
               <div class="filter-field">
                 <label class="filter-label">Período</label>
                 <div class="period-toggle">
-                  <button class="period-btn period-btn-active">
-                    24h
-                  </button>
-                  <button class="period-btn">7d</button>
-                  <button class="period-btn">30d</button>
+                  <button class="period-btn period-btn-active" data-periodo="24h">24h</button>
+                  <button class="period-btn" data-periodo="7d">7d</button>
+                  <button class="period-btn" data-periodo="30d">30d</button>
                 </div>
               </div>
 
@@ -98,15 +92,13 @@
             <div class="kpi-card kpi-card-soft">
               <div class="kpi-header kpi-header-tight">
                 <span class="kpi-label">Média CO2</span>
-                <span class="kpi-chip kpi-chip-down">
-                  <span class="material-symbols-outlined kpi-chip-icon">
-                    trending_down
-                  </span>
-                  -12%
+                <span id="chipCO2" class="kpi-chip kpi-chip-down">
+                  <span class="material-symbols-outlined kpi-chip-icon">trending_down</span>
+                  <span id="chipCO2Texto">--%</span>
                 </span>
               </div>
               <div class="kpi-value-row">
-                <span class="kpi-value">540</span>
+                <span id="kpiCO2" class="kpi-value">--</span>
                 <span class="kpi-unit">ppm</span>
               </div>
             </div>
@@ -114,15 +106,13 @@
             <div class="kpi-card kpi-card-soft">
               <div class="kpi-header kpi-header-tight">
                 <span class="kpi-label">Média VOC</span>
-                <span class="kpi-chip kpi-chip-up-amber">
-                  <span class="material-symbols-outlined kpi-chip-icon">
-                    trending_up
-                  </span>
-                  +4%
+                <span id="chipVOC" class="kpi-chip kpi-chip-up-amber">
+                  <span class="material-symbols-outlined kpi-chip-icon">trending_up</span>
+                  <span id="chipVOCTexto">--%</span>
                 </span>
               </div>
               <div class="kpi-value-row">
-                <span class="kpi-value">180</span>
+                <span id="kpiVOC" class="kpi-value">--</span>
                 <span class="kpi-unit">ppb</span>
               </div>
             </div>
@@ -130,15 +120,13 @@
             <div class="kpi-card kpi-card-soft">
               <div class="kpi-header kpi-header-tight">
                 <span class="kpi-label">Temperatura</span>
-                <span class="kpi-chip kpi-chip-stable">
-                  <span class="material-symbols-outlined kpi-chip-icon">
-                    horizontal_rule
-                  </span>
-                  0%
+                <span id="chipTemp" class="kpi-chip kpi-chip-stable">
+                  <span class="material-symbols-outlined kpi-chip-icon">horizontal_rule</span>
+                  <span id="chipTempTexto">--%</span>
                 </span>
               </div>
               <div class="kpi-value-row">
-                <span class="kpi-value">22.4</span>
+                <span id="kpiTemp" class="kpi-value">--</span>
                 <span class="kpi-unit">°C</span>
               </div>
             </div>
@@ -146,15 +134,13 @@
             <div class="kpi-card kpi-card-soft">
               <div class="kpi-header kpi-header-tight">
                 <span class="kpi-label">Umidade</span>
-                <span class="kpi-chip kpi-chip-down">
-                  <span class="material-symbols-outlined kpi-chip-icon">
-                    trending_down
-                  </span>
-                  -2%
+                <span id="chipUmidade" class="kpi-chip kpi-chip-down">
+                  <span class="material-symbols-outlined kpi-chip-icon">trending_down</span>
+                  <span id="chipUmidadeTexto">--%</span>
                 </span>
               </div>
               <div class="kpi-value-row">
-                <span class="kpi-value">48.2</span>
+                <span id="kpiUmidade" class="kpi-value">--</span>
                 <span class="kpi-unit">%</span>
               </div>
             </div>
@@ -187,76 +173,8 @@
                 </div>
               </div>
 
-              <div class="graph-timeline">
-                <!-- fundo com linhas -->
-                <div class="graph-timeline-bg">
-                  <svg
-                    class="graph-timeline-svg"
-                    viewBox="0 0 100 40"
-                    preserveAspectRatio="none"
-                  >
-                    <!-- CO2 -->
-                    <path
-                      d="M0 30 Q 10 20, 20 25 T 40 15 T 60 20 T 80 10 T 100 15"
-                      fill="none"
-                      stroke="#136dec"
-                      stroke-width="0.5"
-                    ></path>
-                    <!-- Temp -->
-                    <path
-                      d="M0 25 Q 15 28, 30 22 T 50 25 T 75 24 T 100 26"
-                      fill="none"
-                      stroke="#10b981"
-                      stroke-width="0.5"
-                    ></path>
-                    <!-- Markers -->
-                    <line
-                      x1="45"
-                      y1="0"
-                      x2="45"
-                      y2="40"
-                      stroke="#f43f5e"
-                      stroke-width="0.5"
-                      stroke-dasharray="2"
-                    ></line>
-                    <line
-                      x1="75"
-                      y1="0"
-                      x2="75"
-                      y2="40"
-                      stroke="#136dec"
-                      stroke-width="0.5"
-                      stroke-dasharray="2"
-                    ></line>
-                  </svg>
-                </div>
-
-                <!-- balões de marcação -->
-                <div class="graph-marker graph-marker-1">
-                  <span class="graph-marker-label graph-marker-label-rose">
-                    ALERTA: PICO VOC
-                  </span>
-                  <div class="graph-marker-line graph-marker-line-rose"></div>
-                </div>
-                <div class="graph-marker graph-marker-2">
-                  <span class="graph-marker-label graph-marker-label-primary">
-                    INSPEÇÃO SANITÁRIA
-                  </span>
-                  <div
-                    class="graph-marker-line graph-marker-line-primary"
-                  ></div>
-                </div>
-
-                <!-- eixo tempo -->
-                <div class="graph-timeline-xlabels">
-                  <span>00:00</span>
-                  <span>04:00</span>
-                  <span>08:00</span>
-                  <span>12:00</span>
-                  <span>16:00</span>
-                  <span>20:00</span>
-                  <span>23:59</span>
-                </div>
+              <div class="graph-timeline" style="height:220px;position:relative">
+                <canvas id="graficoMultiVariavel"></canvas>
               </div>
             </div>
 
@@ -276,25 +194,10 @@
                 </div>
               </div>
 
-              <div class="scatter-plot">
-                <!-- pontos -->
-                <div class="scatter-dot dot-1"></div>
-                <div class="scatter-dot dot-2"></div>
-                <div class="scatter-dot dot-3"></div>
-                <div class="scatter-dot dot-4"></div>
-                <div class="scatter-dot dot-5"></div>
-                <div class="scatter-dot dot-6"></div>
-                <div class="scatter-dot dot-7"></div>
-                <div class="scatter-dot dot-8"></div>
-                <div class="scatter-dot dot-9"></div>
-
-                <!-- eixos -->
-                <span class="scatter-x-label">
-                  Umidade (%)
-                </span>
-                <span class="scatter-y-label">
-                  CO2 (ppm)
-                </span>
+              <div class="scatter-plot" style="height:180px;position:relative">
+                <canvas id="graficoScatter"></canvas>
+                <span class="scatter-x-label">Umidade (%)</span>
+                <span class="scatter-y-label">CO2 (ppm)</span>
               </div>
             </div>
           </section>
@@ -303,17 +206,13 @@
           <section class="card compliance-card">
             <div class="compliance-header">
               <h3 class="compliance-title">
-                <span class="material-symbols-outlined graph-title-icon">
-                  verified
-                </span>
+                <span class="material-symbols-outlined graph-title-icon">verified</span>
                 Relatório de Conformidade Regulatória
               </h3>
               <div class="compliance-badges">
-                <span class="compliance-chip">
-                  <span class="material-symbols-outlined compliance-chip-icon">
-                    check_circle
-                  </span>
-                  92% COMPLIANCE GLOBAL
+                <span id="complianceGlobalChip" class="compliance-chip">
+                  <span class="material-symbols-outlined compliance-chip-icon">check_circle</span>
+                  <span id="complianceGlobalTexto">-- COMPLIANCE GLOBAL</span>
                 </span>
               </div>
             </div>
@@ -330,130 +229,8 @@
                     <th class="table-head-actions">Status</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr class="table-row">
-                    <td class="table-cell-main">
-                      Temperatura (ºC)
-                    </td>
-                    <td class="table-cell-sub">
-                      21.0 - 24.0 °C
-                    </td>
-                    <td>
-                      <div class="compliance-bar-row">
-                        <div class="compliance-bar-track">
-                          <div
-                            class="compliance-bar-fill compliance-bar-fill-ok"
-                            style="width: 98%"
-                          ></div>
-                        </div>
-                        <span class="compliance-bar-text">98%</span>
-                      </div>
-                    </td>
-                    <td class="compliance-value-ok">
-                      24.1 °C
-                    </td>
-                    <td>Shift 1, 2, 3</td>
-                    <td class="table-cell-actions">
-                      <span
-                        class="material-symbols-outlined compliance-icon-ok"
-                      >
-                        check_circle
-                      </span>
-                    </td>
-                  </tr>
-
-                  <tr class="table-row">
-                    <td class="table-cell-main">
-                      Umidade Relativa (%)
-                    </td>
-                    <td class="table-cell-sub">
-                      40.0 - 60.0 %
-                    </td>
-                    <td>
-                      <div class="compliance-bar-row">
-                        <div class="compliance-bar-track">
-                          <div
-                            class="compliance-bar-fill compliance-bar-fill-ok"
-                            style="width: 92%"
-                          ></div>
-                        </div>
-                        <span class="compliance-bar-text">92%</span>
-                      </div>
-                    </td>
-                    <td class="compliance-value-warn">
-                      64.5 %
-                    </td>
-                    <td>Semanal</td>
-                    <td class="table-cell-actions">
-                      <span
-                        class="material-symbols-outlined compliance-icon-ok"
-                      >
-                        check_circle
-                      </span>
-                    </td>
-                  </tr>
-
-                  <tr class="table-row">
-                    <td class="table-cell-main">
-                      Dióxido de Carbono (CO2)
-                    </td>
-                    <td class="table-cell-sub">
-                      &lt; 1000 ppm
-                    </td>
-                    <td>
-                      <div class="compliance-bar-row">
-                        <div class="compliance-bar-track">
-                          <div
-                            class="compliance-bar-fill compliance-bar-fill-ok"
-                            style="width: 85%"
-                          ></div>
-                        </div>
-                        <span class="compliance-bar-text">85%</span>
-                      </div>
-                    </td>
-                    <td class="compliance-value-bad">
-                      1150 ppm
-                    </td>
-                    <td>Diário</td>
-                    <td class="table-cell-actions">
-                      <span
-                        class="material-symbols-outlined compliance-icon-bad"
-                      >
-                        cancel
-                      </span>
-                    </td>
-                  </tr>
-
-                  <tr class="table-row">
-                    <td class="table-cell-main">
-                      Compostos Orgânicos (VOC)
-                    </td>
-                    <td class="table-cell-sub">
-                      &lt; 300 ppb
-                    </td>
-                    <td>
-                      <div class="compliance-bar-row">
-                        <div class="compliance-bar-track">
-                          <div
-                            class="compliance-bar-fill compliance-bar-fill-ok"
-                            style="width: 99%"
-                          ></div>
-                        </div>
-                        <span class="compliance-bar-text">99%</span>
-                      </div>
-                    </td>
-                    <td class="compliance-value-ok">
-                      120 ppb
-                    </td>
-                    <td>Por Evento</td>
-                    <td class="table-cell-actions">
-                      <span
-                        class="material-symbols-outlined compliance-icon-ok"
-                      >
-                        check_circle
-                      </span>
-                    </td>
-                  </tr>
+                <tbody id="complianceTbody">
+                  <tr><td colspan="6" style="text-align:center;opacity:0.5;padding:1rem">Carregando...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -463,22 +240,166 @@
           <footer class="audit-footer">
             <p class="audit-footer-text">
               Última sincronização de sensores:
-              <span class="audit-footer-strong">
-                há 2 minutos
-              </span>
+              <span id="auditTimestamp" class="audit-footer-strong">--</span>
             </p>
             <div class="audit-footer-links">
-              <a href="#" class="audit-link">
-                Logs de Auditoria
-              </a>
-              <a href="#" class="audit-link">
-                Certificação Técnica
-              </a>
-              <p class="audit-copy">
-                © 2024 MedSystems Analytics
-              </p>
+              <a href="#" class="audit-link">Logs de Auditoria</a>
+              <a href="#" class="audit-link">Certificação Técnica</a>
+              <p class="audit-copy">© 2024 MedSystems Analytics</p>
             </div>
           </footer>
         </main>
       </div>
     </div>
+
+<%- contentFor('espaco-rodape') %>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  let graficoMulti = null;
+  let graficoScatterChart = null;
+  let periodoAtual = '24h';
+
+  // Período buttons
+  document.querySelectorAll('.period-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('period-btn-active'));
+      btn.classList.add('period-btn-active');
+      periodoAtual = btn.dataset.periodo;
+      reloadTendencia();
+    });
+  });
+
+  async function carregarSetores() {
+    try {
+      const setores = await (await fetch('/api/setores')).json();
+      const sel = document.getElementById('selectAmbiente');
+      setores.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id_setor;
+        opt.text = s.nome_setor;
+        sel.appendChild(opt);
+      });
+    } catch(e) { console.error('Setores:', e); }
+  }
+
+  async function carregarResumo() {
+    try {
+      const r = await (await fetch('/api/sensores/resumo')).json();
+
+      function setKPI(idValor, idChip, idChipTexto, valor, variacao, unidade) {
+        document.getElementById(idValor).innerText = valor;
+        const chip = document.getElementById(idChip);
+        const vAbs = Math.abs(variacao);
+        chip.className = `kpi-chip ${variacao < 0 ? 'kpi-chip-down' : (variacao > 0 ? 'kpi-chip-up-amber' : 'kpi-chip-stable')}`;
+        const icon = chip.querySelector('.material-symbols-outlined');
+        icon.innerText = variacao < 0 ? 'trending_down' : (variacao > 0 ? 'trending_up' : 'horizontal_rule');
+        document.getElementById(idChipTexto).innerText = `${variacao > 0 ? '+' : ''}${variacao}%`;
+      }
+
+      setKPI('kpiCO2',     'chipCO2',     'chipCO2Texto',     r.co2_media,     r.co2_variacao_pct,     'ppm');
+      setKPI('kpiVOC',     'chipVOC',     'chipVOCTexto',     r.voc_media,     r.voc_variacao_pct,     'ppb');
+      setKPI('kpiTemp',    'chipTemp',    'chipTempTexto',    r.temp_media,    r.temp_variacao_pct,    '°C');
+      setKPI('kpiUmidade', 'chipUmidade', 'chipUmidadeTexto', r.umidade_media, r.umidade_variacao_pct, '%');
+
+      document.getElementById('auditTimestamp').innerText = r.hora_medicao;
+    } catch(e) { console.error('Resumo:', e); }
+  }
+
+  async function carregarGraficos() {
+    try {
+      const dados = await (await fetch(`/api/graficos/ambiental?periodo=${periodoAtual}`)).json();
+      const labels = dados.map(d => d.hora);
+
+      // Gráfico multi-variável
+      if (graficoMulti) graficoMulti.destroy();
+      graficoMulti = new Chart(document.getElementById('graficoMultiVariavel'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            { label: 'CO2 (ppm)', data: dados.map(d => d.co2),  borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.08)', tension: 0.4, fill: true },
+            { label: 'Temp (°C)', data: dados.map(d => d.temp), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.06)', tension: 0.4 },
+            { label: 'VOC (ppb)', data: dados.map(d => d.voc),  borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.06)', tension: 0.4 },
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'top' } },
+          scales: {
+            x: { ticks: { maxTicksLimit: 10 } },
+            y: { ticks: { maxTicksLimit: 6 } }
+          }
+        }
+      });
+
+      // Scatter plot CO2 vs Umidade colorido por VOC
+      if (graficoScatterChart) graficoScatterChart.destroy();
+      const maxVOC = Math.max(...dados.map(d => d.voc), 1);
+      graficoScatterChart = new Chart(document.getElementById('graficoScatter'), {
+        type: 'scatter',
+        data: {
+          datasets: [{
+            label: 'CO2 vs Umidade',
+            data: dados.map(d => ({ x: d.humid, y: d.co2 })),
+            backgroundColor: dados.map(d => `hsl(${240 - (d.voc/maxVOC)*180}, 70%, 55%)`),
+            pointRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { title: { display: true, text: 'Umidade (%)' } },
+            y: { title: { display: true, text: 'CO2 (ppm)' } }
+          }
+        }
+      });
+    } catch(e) { console.error('Gráficos:', e); }
+  }
+
+  async function carregarCompliance() {
+    try {
+      const { global, parametros } = await (await fetch(`/api/tendencia/compliance?periodo=${periodoAtual}`)).json();
+      document.getElementById('complianceGlobalTexto').innerText = `${global}% COMPLIANCE GLOBAL`;
+
+      const tbody = document.getElementById('complianceTbody');
+      tbody.innerHTML = '';
+      parametros.forEach(p => {
+        const ok = p.pct_conformidade >= 95;
+        const barClass = p.pct_conformidade >= 90 ? 'compliance-bar-fill-ok' : 'compliance-bar-fill-warn';
+        const valClass = p.pct_conformidade >= 90 ? 'compliance-value-ok' : 'compliance-value-bad';
+        const icon     = ok ? 'check_circle' : 'cancel';
+        const iconClass= ok ? 'compliance-icon-ok' : 'compliance-icon-bad';
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr class="table-row">
+            <td class="table-cell-main">${p.parametro}</td>
+            <td class="table-cell-sub">&lt; ${p.padrao_max} ${p.unidade}</td>
+            <td>
+              <div class="compliance-bar-row">
+                <div class="compliance-bar-track">
+                  <div class="compliance-bar-fill ${barClass}" style="width:${p.pct_conformidade}%"></div>
+                </div>
+                <span class="compliance-bar-text">${p.pct_conformidade}%</span>
+              </div>
+            </td>
+            <td class="${valClass}">${p.desvio_max} ${p.unidade}</td>
+            <td>Contínuo</td>
+            <td class="table-cell-actions">
+              <span class="material-symbols-outlined ${iconClass}">${icon}</span>
+            </td>
+          </tr>
+        `);
+      });
+    } catch(e) { console.error('Compliance:', e); }
+  }
+
+  function reloadTendencia() {
+    carregarResumo();
+    carregarGraficos();
+    carregarCompliance();
+  }
+
+  carregarSetores();
+  reloadTendencia();
+  setInterval(reloadTendencia, 30000);
+</script>

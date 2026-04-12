@@ -61,60 +61,42 @@
               <div class="kpi-card">
                 <div class="kpi-header">
                   <p class="kpi-label">Tempo de Resposta (7d)</p>
-                  <span class="material-symbols-outlined kpi-icon-primary">
-                    timer
-                  </span>
+                  <span class="material-symbols-outlined kpi-icon-primary">timer</span>
                 </div>
-                <p class="kpi-value">12 min</p>
-                <div class="kpi-trend kpi-trend-down">
-                  <span class="material-symbols-outlined kpi-trend-icon">
-                    trending_down
-                  </span>
-                  <p class="kpi-trend-text">-2% vs sem. anterior</p>
+                <p id="kpiTempoResposta" class="kpi-value">-- min</p>
+                <div id="kpiTendenciaWrapper" class="kpi-trend kpi-trend-down">
+                  <span class="material-symbols-outlined kpi-trend-icon">trending_down</span>
+                  <p id="kpiVariacaoTexto" class="kpi-trend-text">-- % vs sem. anterior</p>
                 </div>
               </div>
 
               <div class="kpi-card">
                 <div class="kpi-header">
                   <p class="kpi-label">Resolvidos no SLA</p>
-                  <span class="material-symbols-outlined kpi-icon-primary">
-                    verified
-                  </span>
+                  <span class="material-symbols-outlined kpi-icon-primary">verified</span>
                 </div>
-                <p class="kpi-value">94.2%</p>
+                <p id="kpiSLA" class="kpi-value">--%</p>
                 <div class="kpi-trend kpi-trend-up">
-                  <span class="material-symbols-outlined kpi-trend-icon">
-                    trending_up
-                  </span>
-                  <p class="kpi-trend-text">+5.1% vs meta</p>
+                  <span class="material-symbols-outlined kpi-trend-icon">verified</span>
+                  <p class="kpi-trend-text">Meta: 90%</p>
                 </div>
               </div>
 
               <div class="kpi-card">
                 <div class="kpi-header">
                   <p class="kpi-label">Setores Críticos</p>
-                  <span class="material-symbols-outlined kpi-icon-primary">
-                    priority_high
-                  </span>
+                  <span class="material-symbols-outlined kpi-icon-primary">priority_high</span>
                 </div>
-                <p class="kpi-value">UTI 2, Ala B</p>
+                <p id="kpiSetoresCriticos" class="kpi-value">--</p>
                 <p class="kpi-subtext">Baseado em incidência</p>
               </div>
 
               <div class="kpi-card">
                 <p class="kpi-label mb-2">Alertas vs Resolução</p>
-                <div class="bar-mini-chart">
-                  <div class="bar-mini bar-mini-soft h-40"></div>
-                  <div class="bar-mini h-80"></div>
-                  <div class="bar-mini bar-mini-soft h-50"></div>
-                  <div class="bar-mini h-90"></div>
-                  <div class="bar-mini h-60"></div>
-                  <div class="bar-mini bar-mini-soft h-30"></div>
-                  <div class="bar-mini h-75"></div>
+                <div id="miniChartContainer" class="bar-mini-chart">
+                  <p style="opacity:0.4;font-size:0.7rem">Carregando...</p>
                 </div>
-                <p class="bar-mini-legend">
-                  Últimos 7 dias (M-T-Q-Q-S-S-D)
-                </p>
+                <p class="bar-mini-legend">Últimos 7 dias</p>
               </div>
             </section>
 
@@ -171,149 +153,17 @@
                       <th class="table-head-actions">Ações</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr class="table-row">
-                      <td>
-                        <p class="table-cell-main">Hoje, 14:22</p>
-                      </td>
-                      <td>
-                        <p class="table-cell-main">UTI 2 - Leito 04</p>
-                      </td>
-                      <td>
-                        <div class="table-tag-with-text">
-                          <span class="tag tag-amber">CO2</span>
-                          <p class="tag-caption">Nível Elevado</p>
-                        </div>
-                      </td>
-                      <td>
-                        <div class="severity severity-critical">
-                          <span class="material-symbols-outlined severity-icon">
-                            error
-                          </span>
-                          <span class="severity-label">Crítico</span>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="sla-time sla-time-critical">
-                          04m 12s
-                        </p>
-                      </td>
-                      <td>
-                        <span class="status-pill status-pill-info">
-                          Em Progresso
-                        </span>
-                      </td>
-                      <td class="table-cell-actions">
-                        <button class="icon-button-ghost">
-                          <span class="material-symbols-outlined">
-                            visibility
-                          </span>
-                        </button>
-                      </td>
-                    </tr>
-
-                    <tr class="table-row table-row-critical">
-                      <td>
-                        <p class="table-cell-main">Hoje, 14:15</p>
-                      </td>
-                      <td>
-                        <p class="table-cell-main">Ala B - Corredor</p>
-                      </td>
-                      <td>
-                        <div class="table-tag-with-text">
-                          <span class="tag tag-purple">
-                            Superlotação
-                          </span>
-                          <p class="tag-caption">Bloqueio Via</p>
-                        </div>
-                      </td>
-                      <td>
-                        <div class="severity severity-critical">
-                          <span class="material-symbols-outlined severity-icon">
-                            error
-                          </span>
-                          <span class="severity-label">Crítico</span>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="sla-time sla-time-expired">
-                          Expirado
-                        </p>
-                      </td>
-                      <td>
-                        <span class="status-pill status-pill-danger">
-                          Aberto
-                        </span>
-                      </td>
-                      <td class="table-cell-actions">
-                        <button class="icon-button-ghost">
-                          <span class="material-symbols-outlined">
-                            visibility
-                          </span>
-                        </button>
-                      </td>
-                    </tr>
-
-                    <tr class="table-row">
-                      <td>
-                        <p class="table-cell-main">Hoje, 13:58</p>
-                      </td>
-                      <td>
-                        <p class="table-cell-main">Farmácia Central</p>
-                      </td>
-                      <td>
-                        <div class="table-tag-with-text">
-                          <span class="tag tag-blue">
-                            Temperatura
-                          </span>
-                          <p class="tag-caption">+4.2°C</p>
-                        </div>
-                      </td>
-                      <td>
-                        <div class="severity severity-warning">
-                          <span class="material-symbols-outlined severity-icon">
-                            warning
-                          </span>
-                          <span class="severity-label">Alerta</span>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="sla-time sla-time-neutral">
-                          12m 45s
-                        </p>
-                      </td>
-                      <td>
-                        <span class="status-pill status-pill-success">
-                          Resolvido
-                        </span>
-                      </td>
-                      <td class="table-cell-actions">
-                        <button class="icon-button-ghost">
-                          <span class="material-symbols-outlined">
-                            visibility
-                          </span>
-                        </button>
-                      </td>
-                    </tr>
+                  <tbody id="alertasTbody">
+                    <tr><td colspan="7" style="text-align:center;opacity:0.5;padding:1rem">Carregando alertas...</td></tr>
                   </tbody>
                 </table>
               </div>
 
               <div class="alerts-footer">
-                <p class="alerts-footer-text">
-                  Mostrando 3 de 128 alertas nas últimas 24h
-                </p>
+                <p id="alertasFooterText" class="alerts-footer-text">Mostrando -- alertas</p>
                 <div class="alerts-pagination">
-                  <button class="pagination-button">
-                    <span class="material-symbols-outlined pagination-icon">
-                      chevron_left
-                    </span>
-                  </button>
-                  <button class="pagination-button">
-                    <span class="material-symbols-outlined pagination-icon">
-                      chevron_right
-                    </span>
-                  </button>
+                  <button class="pagination-button"><span class="material-symbols-outlined pagination-icon">chevron_left</span></button>
+                  <button class="pagination-button"><span class="material-symbols-outlined pagination-icon">chevron_right</span></button>
                 </div>
               </div>
             </section>
@@ -510,3 +360,134 @@
         </div>
       </div>
     </div>
+
+<%- contentFor('espaco-rodape') %>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const TAG_CLASSES = {
+    CO2:         'tag-amber',
+    VOC:         'tag-purple',
+    TEMPERATURA: 'tag-blue',
+    UMIDADE:     'tag-blue',
+    RUIDO:       'tag-amber',
+    PESSOAS:     'tag-purple',
+  };
+  const STATUS_PILLS = {
+    ABERTO:          'status-pill-danger',
+    EM_ATENDIMENTO:  'status-pill-info',
+    RESOLVIDO:       'status-pill-success',
+  };
+
+  async function carregarKPIs() {
+    try {
+      const k = await (await fetch('/api/alertas/kpis')).json();
+      document.getElementById('kpiTempoResposta').innerText =
+        `${k.tempo_medio_resposta_min || 0} min`;
+      document.getElementById('kpiSLA').innerText =
+        `${k.pct_resposta_no_sla || 0}%`;
+      const sc = k.setores_criticos && k.setores_criticos.length
+        ? k.setores_criticos.join(', ')
+        : 'Nenhum';
+      document.getElementById('kpiSetoresCriticos').innerText = sc;
+
+      const vr = k.variacao_resposta_pct || 0;
+      const tw = document.getElementById('kpiTendenciaWrapper');
+      const tvt = document.getElementById('kpiVariacaoTexto');
+      tw.className = `kpi-trend ${vr <= 0 ? 'kpi-trend-down' : 'kpi-trend-up'}`;
+      const icon = tw.querySelector('.material-symbols-outlined');
+      icon.innerText = vr <= 0 ? 'trending_down' : 'trending_up';
+      tvt.innerText = `${vr > 0 ? '+' : ''}${vr}% vs sem. anterior`;
+    } catch(e) { console.error('KPIs error:', e); }
+  }
+
+  async function carregarHistoricoChart() {
+    try {
+      const hist = await (await fetch('/api/alertas/historico')).json();
+      const container = document.getElementById('miniChartContainer');
+      container.innerHTML = '';
+      if (!hist.length) {
+        container.innerHTML = '<p style="opacity:0.4;font-size:0.7rem">Sem dados esta semana</p>';
+        return;
+      }
+      const maxVal = Math.max(...hist.map(h => h.total_disparados), 1);
+      hist.forEach(h => {
+        const hPct = Math.round((h.total_resolvidos / maxVal) * 100);
+        const tPct = Math.round((h.total_disparados / maxVal) * 100);
+        container.insertAdjacentHTML('beforeend',
+          `<div class="bar-mini" style="height:${tPct}%" title="${h.dia}: ${h.total_disparados} alertas"></div>` +
+          `<div class="bar-mini bar-mini-soft" style="height:${hPct}%" title="${h.dia}: ${h.total_resolvidos} resolvidos"></div>`
+        );
+      });
+    } catch(e) { console.error('Histórico error:', e); }
+  }
+
+  async function carregarAlertas() {
+    try {
+      const alertas = await (await fetch('/api/alertas')).json();
+      const tbody = document.getElementById('alertasTbody');
+      tbody.innerHTML = '';
+
+      if (!alertas.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;opacity:0.5;padding:1rem">Nenhum alerta registrado.</td></tr>';
+        document.getElementById('alertasFooterText').innerText = 'Nenhum alerta encontrado';
+        return;
+      }
+
+      document.getElementById('alertasFooterText').innerText =
+        `Mostrando ${alertas.length} alerta${alertas.length > 1 ? 's' : ''}`;
+
+      alertas.forEach(a => {
+        const tagClass = TAG_CLASSES[a.parametro] || 'tag-amber';
+        const sevClass = a.severidade === 'CRITICO' ? 'severity-critical' : 'severity-warning';
+        const sevIcon  = a.severidade === 'CRITICO' ? 'error' : 'warning';
+        const sevLabel = a.severidade === 'CRITICO' ? 'Crítico' : 'Alerta';
+        const pillClass = STATUS_PILLS[a.status] || 'status-pill-info';
+        const statusLabel = a.status.replace('_', ' ');
+
+        // SLA: 15 min = 900 seg
+        let slaHtml;
+        if (a.status === 'RESOLVIDO') {
+          slaHtml = `<p class="sla-time sla-time-neutral">${a.minutos_ate_atendimento || '--'} min</p>`;
+        } else if (a.minutos_desde_disparo > 15) {
+          slaHtml = `<p class="sla-time sla-time-expired">Expirado</p>`;
+        } else {
+          const rest = 15 - a.minutos_desde_disparo;
+          slaHtml = `<p class="sla-time sla-time-critical">${rest}m restante</p>`;
+        }
+
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr class="table-row ${a.severidade === 'CRITICO' ? 'table-row-critical' : ''}">
+            <td><p class="table-cell-main">${a.data_hora}</p></td>
+            <td><p class="table-cell-main">${a.nome_setor}</p></td>
+            <td>
+              <div class="table-tag-with-text">
+                <span class="tag ${tagClass}">${a.parametro}</span>
+                <p class="tag-caption">${a.descricao ? a.descricao.substring(0, 25) + '...' : ''}</p>
+              </div>
+            </td>
+            <td>
+              <div class="severity ${sevClass}">
+                <span class="material-symbols-outlined severity-icon">${sevIcon}</span>
+                <span class="severity-label">${sevLabel}</span>
+              </div>
+            </td>
+            <td>${slaHtml}</td>
+            <td><span class="status-pill ${pillClass}">${statusLabel}</span></td>
+            <td class="table-cell-actions">
+              <button class="icon-button-ghost"><span class="material-symbols-outlined">visibility</span></button>
+            </td>
+          </tr>
+        `);
+      });
+    } catch(e) { console.error('Alertas error:', e); }
+  }
+
+  function reloadCentral() {
+    carregarKPIs();
+    carregarHistoricoChart();
+    carregarAlertas();
+  }
+
+  reloadCentral();
+  setInterval(reloadCentral, 15000);
+</script>

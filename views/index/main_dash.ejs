@@ -8,19 +8,17 @@
         <svg>
           <circle cx="64" cy="64" r="56" fill="transparent" stroke="currentColor" stroke-width="8" class="gauge-track">
           </circle>
-          <circle class="gauge-ring" cx="64" cy="64" r="56" fill="transparent" stroke="currentColor" stroke-width="8"
-            stroke-dasharray="351.85" stroke-dashoffset="70.37" stroke-linecap="round"></circle>
+          <circle id="gaugeRing" class="gauge-ring" cx="64" cy="64" r="56" fill="transparent" stroke="currentColor" stroke-width="8"
+            stroke-dasharray="351.85" stroke-dashoffset="351.85" stroke-linecap="round"></circle>
         </svg>
         <div class="gauge-center">
-          <span class="gauge-value">80</span>
+          <span id="gaugeValor" class="gauge-value">--</span>
           <span class="gauge-label">Score</span>
         </div>
       </div>
-      <div class="status-pill status-pill-success">
-        <span class="material-symbols-outlined status-pill-icon">
-          check_circle
-        </span>
-        <span class="status-pill-text">ESTÁVEL</span>
+      <div id="statusGeral" class="status-pill status-pill-success">
+        <span class="material-symbols-outlined status-pill-icon">check_circle</span>
+        <span id="statusGeralText" class="status-pill-text">--</span>
       </div>
     </div>
 
@@ -77,10 +75,8 @@
         </div>
         <div>
           <p class="highlight-label">Maior CO2</p>
-          <h4 class="highlight-title">UTI Adulto 2</h4>
-          <p class="highlight-meta highlight-meta-danger">
-            1240 ppm (+15%)
-          </p>
+          <h4 id="picoCO2Setor" class="highlight-title">--</h4>
+          <p id="picoCO2Valor" class="highlight-meta highlight-meta-danger">-- ppm</p>
         </div>
       </div>
 
@@ -90,8 +86,8 @@
         </div>
         <div>
           <p class="highlight-label">Maior VOC</p>
-          <h4 class="highlight-title">Enfermaria Ala B</h4>
-          <p class="highlight-meta highlight-meta-warning">Médio Risco</p>
+          <h4 id="picoVOCSetor" class="highlight-title">--</h4>
+          <p id="picoVOCValor" class="highlight-meta highlight-meta-warning">-- ppb</p>
         </div>
       </div>
 
@@ -101,10 +97,8 @@
         </div>
         <div>
           <p class="highlight-label">Eventos de Odor (Hoje)</p>
-          <h4 class="highlight-title">Sanitário P3</h4>
-          <p class="highlight-meta highlight-meta-primary">
-            12 ocorrências
-          </p>
+          <h4 class="highlight-title">—</h4>
+          <p id="eventosOdorHoje" class="highlight-meta highlight-meta-primary">-- ocorrências</p>
         </div>
       </div>
     </section>
@@ -129,75 +123,8 @@
         </div>
       </div>
 
-      <div class="heatmap-grid">
-        <!-- Block 1: UTI 01 -->
-        <!-- Block 1: UTI 01 (Crítico) -->
-        <article class="heat-tile heat-tile-critical">
-          <div class="heat-tile-header">
-            <div class="tile-info">
-              <h4 class="heat-tile-title">UTI 01</h4>
-              <p class="heat-tile-badge heat-tile-badge-critical">Crítico</p>
-            </div>
-
-            <!-- Nova Bolinha Interativa -->
-            <div class="status-indicator">
-              <span class="status-dot-pulse dot-danger"></span>
-              <div class="status-tooltip">
-                <strong>4 ALERTAS</strong> (24h)
-              </div>
-            </div>
-          </div>
-
-          <div class="sparkline">
-            <div class="spark-bar spark-red-40 h-40"></div>
-            <div class="spark-bar spark-red-40 h-60"></div>
-            <div class="spark-bar spark-red-40 h-100"></div>
-          </div>
-          <p class="heat-tile-metric">CO2: <span class="metric-danger">1450 ppm</span></p>
-        </article>
-
-        <!-- Block 2: Ala B (Normal) -->
-        <article class="heat-tile heat-tile-normal">
-          <div class="heat-tile-header">
-            <div class="tile-info">
-              <h4 class="heat-tile-title">Ala B - Leitos</h4>
-              <p class="heat-tile-badge heat-tile-badge-normal">Normal</p>
-            </div>
-
-            <div class="status-indicator">
-              <span class="status-dot-pulse dot-success"></span>
-              <div class="status-tooltip">Sistema Estável</div>
-            </div>
-          </div>
-
-          <div class="sparkline">
-            <div class="spark-bar spark-green-30 h-20"></div>
-            <div class="spark-bar spark-green-40 h-25"></div>
-          </div>
-          <p class="heat-tile-metric">CO2: <span class="metric-success">420 ppm</span></p>
-        </article>
-
-        <!-- Block 3: Espera Principal (Atenção) -->
-        <article class="heat-tile heat-tile-warning">
-          <div class="heat-tile-header">
-            <div class="tile-info">
-              <h4 class="heat-tile-title">Espera Principal</h4>
-              <p class="heat-tile-badge heat-tile-badge-warning">Atenção</p>
-            </div>
-
-            <div class="status-indicator">
-              <span class="status-dot-pulse dot-warning"></span>
-              <div class="status-tooltip"><strong>1 ALERTA</strong> pendente</div>
-            </div>
-          </div>
-
-          <div class="sparkline">
-            <div class="spark-bar spark-yellow-30 h-50"></div>
-            <div class="spark-bar spark-yellow-40 h-60"></div>
-          </div>
-          <p class="heat-tile-metric">CO2: <span class="metric-warning">880 ppm</span></p>
-        </article>
-
+      <div id="heatmapGrid" class="heatmap-grid">
+        <p style="opacity:0.5;padding:1rem">Carregando setores...</p>
       </div>
     </section>
 
@@ -205,18 +132,12 @@
     <footer class="statusbar">
       <div class="statusbar-left">
         <div class="status-item">
-          <span class="material-symbols-outlined status-item-icon sync-icon">
-            sync
-          </span>
-          <span class="status-item-text">
-            Última atualização: agora mesmo
-          </span>
+          <span class="material-symbols-outlined status-item-icon sync-icon">sync</span>
+          <span id="ultimaAtualizacao" class="status-item-text">Última atualização: --</span>
         </div>
         <div class="status-item">
-          <span class="material-symbols-outlined status-item-icon sensors-icon">
-            sensors
-          </span>
-          <span class="status-item-text">142 Sensores Ativos</span>
+          <span class="material-symbols-outlined status-item-icon sensors-icon">sensors</span>
+          <span id="sensoresAtivos" class="status-item-text">-- Sensores Ativos</span>
         </div>
       </div>
 
@@ -233,3 +154,114 @@
     </footer>
   </main>
 </div>
+
+<%- contentFor('espaco-rodape') %>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const STATUS_CLASSES = {
+    NORMAL:  { tile: 'heat-tile-normal',   badge: 'heat-tile-badge-normal',   dot: 'dot-success',  metric: 'metric-success',  pill: 'status-pill-success',  icon: 'check_circle',       label: 'Normal'  },
+    ATENCAO: { tile: 'heat-tile-warning',  badge: 'heat-tile-badge-warning',  dot: 'dot-warning',  metric: 'metric-warning',  pill: 'status-pill-warning',  icon: 'warning',            label: 'Atenção' },
+    CRITICO: { tile: 'heat-tile-critical', badge: 'heat-tile-badge-critical', dot: 'dot-danger',   metric: 'metric-danger',   pill: 'status-pill-danger',   icon: 'dangerous',          label: 'Crítico' },
+  };
+
+  const sparksCharts = {};
+
+  function renderSparkline(canvasId, historico) {
+    if (sparksCharts[canvasId]) sparksCharts[canvasId].destroy();
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    sparksCharts[canvasId] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: historico.map((_, i) => i),
+        datasets: [{ data: historico, backgroundColor: 'rgba(99,102,241,0.5)', borderRadius: 3 }]
+      },
+      options: {
+        responsive: false, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: { x: { display: false }, y: { display: false } },
+        layout: { padding: 0 }
+      }
+    });
+  }
+
+  async function carregarResumo() {
+    try {
+      const d = await (await fetch('/api/dashboard/resumo')).json();
+
+      // Gauge
+      const score = d.score_ambiental || 0;
+      document.getElementById('gaugeValor').innerText = score;
+      const circum = 351.85;
+      const offset = circum - (score / 100) * circum;
+      document.getElementById('gaugeRing').setAttribute('stroke-dashoffset', offset.toFixed(2));
+
+      // Status Pill
+      const sc = STATUS_CLASSES[d.status_geral] || STATUS_CLASSES.NORMAL;
+      const pill = document.getElementById('statusGeral');
+      pill.className = `status-pill ${sc.pill}`;
+      pill.querySelector('.material-symbols-outlined').innerText = sc.icon;
+      document.getElementById('statusGeralText').innerText = d.status_geral === 'NORMAL' ? 'ESTÁVEL' : d.status_geral;
+
+      // Highlight cards
+      document.getElementById('picoCO2Setor').innerText = d.pico_co2_setor;
+      document.getElementById('picoCO2Valor').innerText = `${d.pico_co2_valor} ppm`;
+      document.getElementById('picoVOCSetor').innerText = d.pico_voc_setor;
+      document.getElementById('picoVOCValor').innerText = `${d.pico_voc_valor} ppb`;
+      document.getElementById('eventosOdorHoje').innerText = `${d.eventos_odor_hoje} ocorrências`;
+
+      // Status Bar
+      document.getElementById('ultimaAtualizacao').innerText = `Última atualização: ${d.hora_medicao}`;
+      document.getElementById('sensoresAtivos').innerText = `${d.sensores_ativos} Sensores Ativos`;
+    } catch(e) { console.error('Erro ao carregar resumo:', e); }
+  }
+
+  async function carregarHeatmap() {
+    try {
+      const setores = await (await fetch('/api/dashboard/heatmap')).json();
+      const grid = document.getElementById('heatmapGrid');
+      grid.innerHTML = '';
+
+      setores.forEach((s, idx) => {
+        const sc = STATUS_CLASSES[s.status] || STATUS_CLASSES.NORMAL;
+        const canvasId = `spark_${idx}`;
+        const tooltipText = s.alertas_24h > 0
+          ? `<strong>${s.alertas_24h} ALERTA${s.alertas_24h > 1 ? 'S' : ''}</strong> (24h)`
+          : 'Sistema Estável';
+
+        grid.insertAdjacentHTML('beforeend', `
+          <article class="heat-tile ${sc.tile}">
+            <div class="heat-tile-header">
+              <div class="tile-info">
+                <h4 class="heat-tile-title">${s.nome_setor}</h4>
+                <p class="heat-tile-badge ${sc.badge}">${sc.label}</p>
+              </div>
+              <div class="status-indicator">
+                <span class="status-dot-pulse ${sc.dot}"></span>
+                <div class="status-tooltip">${tooltipText}</div>
+              </div>
+            </div>
+            <div class="sparkline" style="height:36px;position:relative">
+              <canvas id="${canvasId}" width="120" height="36"></canvas>
+            </div>
+            <p class="heat-tile-metric">
+              CO2: <span class="${sc.metric}">${s.co2_atual} ppm</span>
+              &nbsp;|&nbsp; <span>${s.pessoas_atuais} pessoas</span>
+            </p>
+          </article>
+        `);
+
+        // Renderiza sparkline depois que o DOM existe
+        requestAnimationFrame(() => renderSparkline(canvasId, s.historico || []));
+      });
+    } catch(e) { console.error('Erro no heatmap:', e); }
+  }
+
+  function reloadDash() {
+    carregarResumo();
+    carregarHeatmap();
+  }
+
+  reloadDash();
+  setInterval(reloadDash, 15000);
+</script>
