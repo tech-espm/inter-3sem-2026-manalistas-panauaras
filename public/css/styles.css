@@ -4002,3 +4002,171 @@ html.dark .events-table-head {
   gap: 1.5rem;
 }
 
+/* ADICIONE ESTE BLOCO AO SEU styles.css 
+   Ele utiliza as variáveis e classes base do seu projeto 
+*/
+
+.page-header-container {
+    margin-bottom: 2rem;
+}
+
+.section-subtitle {
+    color: var(--color-slate-500);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Grid adaptável similar ao seu highlight-grid */
+.about-grid {
+    display: grid;
+    gap: 2rem;
+    width: 100%; /* Ocupa 100% do container pai */
+}
+
+
+/* Estilo do Card Minimalista */
+.dev-card {
+    background: #fff;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-slate-100);
+    display: flex;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.dev-card:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    
+}
+
+.dev-header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+}
+
+.avatar-container {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.avatar-container img {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    border: 2px solid var(--color-slate-50);
+}
+
+.status-indicator {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 14px;
+    height: 14px;
+    background-color: #22c55e;
+    border: 3px solid #fff;
+    border-radius: 50%;
+}
+
+.dev-body {
+    text-align: center;
+    flex-grow: 1;
+}
+
+.dev-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-slate-900);
+    margin-bottom: 0.25rem;
+}
+
+/* O estilo 0.7rem bold que você solicitou anteriormente */
+.card-title-tiny {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.dev-description {
+    font-size: 0.875rem;
+    color: var(--color-slate-500);
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
+}
+
+.dev-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.mini-tag {
+    background: var(--color-slate-50);
+    color: var(--color-slate-600);
+    padding: 2px 8px;
+    border-radius: var(--radius-md);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.dev-footer {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-slate-50);
+}
+
+.social-btn {
+    color: var(--color-slate-400);
+    font-size: 1.25rem;
+    transition: color 0.2s ease;
+}
+
+.social-btn:hover {
+    color: var(--color-primary);
+}
+
+/* Card de info inferior */
+.info-banner-card {
+    background: #fff;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-slate-100);
+    padding: 1.5rem;
+}
+
+.highlight-text {
+    font-size: 1.125rem;
+    color: var(--color-slate-600);
+    font-weight: 500;
+    line-height: 1.6;
+}
+
+/* Dark Mode Support */
+html.dark .dev-card, 
+html.dark .info-banner-card {
+    background-color: var(--color-neutral-800);
+    border-color: var(--color-slate-800);
+}
+
+html.dark .dev-name,
+html.dark .highlight-text {
+    color: #fff;
+}
+
+html.dark .mini-tag {
+    background: var(--color-slate-800);
+    color: var(--color-slate-400);
+}
