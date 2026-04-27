@@ -39,39 +39,6 @@
   </header>
 
   <div class="flex-layout">
-    <!-- Sidebar -->
-    <aside class="sidebar sidebar-thin">
-      <div class="sidebar-unit-card">
-        <p class="sidebar-unit-label">
-          Unidade Selecionada
-        </p>
-        <p class="sidebar-unit-name">
-          Hospital Central
-        </p>
-        <p class="sidebar-unit-meta">
-          Prédio B - Ala Norte
-        </p>
-      </div>
-      <nav class="sidebar-nav">
-        <a href="#" class="sidebar-nav-item sidebar-nav-item-active">
-          <span class="material-symbols-outlined">dashboard</span>
-          Dashboard
-        </a>
-        <a href="#" class="sidebar-nav-item">
-          <span class="material-symbols-outlined">analytics</span>
-          Relatórios
-        </a>
-        <a href="#" class="sidebar-nav-item">
-          <span class="material-symbols-outlined">sensors</span>
-          Sensores PCA
-        </a>
-        <a href="#" class="sidebar-nav-item">
-          <span class="material-symbols-outlined">history</span>
-          Histórico
-        </a>
-      </nav>
-    </aside>
-
     <!-- Main Content -->
     <main class="central-main central-main-padded">
       <!-- Header Section -->
@@ -92,8 +59,8 @@
             <span class="last-update-label">
               Última Atualiz.
             </span>
-            <span class="last-update-time">
-              14:45:02
+            <span class="last-update-time" id="displayUltimaAtualizacao">
+              --:--:--
             </span>
           </div>
         </div>
@@ -146,6 +113,8 @@
               </span>
               Fluxo de Ocupação (60 min)
             </h3>
+            <!--
+            
             <div class="graph-badges">
               <span class="graph-badge graph-badge-red">
                 <span class="graph-badge-dot graph-badge-dot-red"></span>
@@ -156,26 +125,23 @@
                 Alerta
               </span>
             </div>
+            -->
           </div>
           <div class="flow-chart">
             <!-- bands -->
             <div class="flow-chart-bands">
+              <!--
               <div class="flow-band flow-band-critical"></div>
               <div class="flow-band flow-band-warning"></div>
               <div class="flow-band flow-band-normal"></div>
+              -->
             </div>
             <!-- grid pattern is via CSS class -->
             <div class="flow-chart-inner chart-grid">
-              <canvas id="fluxoOcupacaoChart" style="width: 100%; height: 100%;"></canvas>
+              <canvas id="fluxoOcupacaoChart" style="width: 100%; height: 20vh;"></canvas>
             </div>
           </div>
-          <div class="flow-chart-xlabels">
-            <span>13:45</span>
-            <span>14:00</span>
-            <span>14:15</span>
-            <span>14:30</span>
-            <span>AGORA</span>
-          </div>
+
         </article>
 
         <!-- Permanence Delta Graph -->
@@ -308,7 +274,9 @@
               </tr>
             </thead>
             <tbody id="tabelaEventos">
-              <tr><td colspan="4" class="text-center">Carregando eventos...</td></tr>
+              <tr>
+                <td colspan="4" class="text-center">Carregando eventos...</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -321,15 +289,15 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     const chartSettingsMini = {
-        type: 'line',
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { enabled: false } },
-            scales: { x: { display: false }, y: { display: false } },
-            elements: { point: { radius: 0 } },
-            layout: { padding: 0 }
-        }
+      type: 'line',
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: { x: { display: false }, y: { display: false } },
+        elements: { point: { radius: 0 } },
+        layout: { padding: 0 }
+      }
     };
 
     let chartCO2Instance = null;
@@ -338,55 +306,55 @@
     let fluxoChartInstance = null;
 
     function renderMiniChart(canvasId, color, dataValues, chartRef) {
-        const ctx = document.getElementById(canvasId).getContext('2d');
-        if (chartRef) chartRef.destroy();
-        return new Chart(ctx, {
-            ...chartSettingsMini,
-            data: {
-                labels: dataValues.map((_, i) => i),
-                datasets: [{ data: dataValues, borderColor: color, tension: 0.4, fill: false, borderWidth: 2 }]
-            }
-        });
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      if (chartRef) chartRef.destroy();
+      return new Chart(ctx, {
+        ...chartSettingsMini,
+        data: {
+          labels: dataValues.map((_, i) => i),
+          datasets: [{ data: dataValues, borderColor: color, tension: 0.4, fill: false, borderWidth: 2 }]
+        }
+      });
     }
 
     async function carregarCorrelacaoAmbiental() {
-       try {
-           const resp = await fetch('/api/graficos/ambiental');
-           const data = await resp.json();
-           
-           if(data.length > 0) {
-               const latest = data[data.length - 1]; // O ultimo eh o atual
-               document.getElementById('valCO2').innerText = latest.co2;
-               document.getElementById('valHumid').innerText = latest.humid + '%';
-               document.getElementById('valTemp').innerText = latest.temp;
-               
-               chartCO2Instance = renderMiniChart('chartCO2', '#10b981', data.map(d=>d.co2), chartCO2Instance);
-               chartHumidInstance = renderMiniChart('chartHumid', '#3b82f6', data.map(d=>d.humid), chartHumidInstance);
-               chartTempInstance = renderMiniChart('chartTemp', '#ef4444', data.map(d=>d.temp), chartTempInstance);
+      try {
+        const resp = await fetch('/api/graficos/ambiental');
+        const data = await resp.json();
 
-               // Altera o pseudo valor de permanencia apenas como mock interativo com base no dado
-               document.getElementById('permanenciaTempo').innerText = (latest.co2 * 1.5).toFixed(0);
-           }
-       } catch (e) { console.error('Erro ao buscar correlacao:', e); }
+        if (data.length > 0) {
+          const latest = data[data.length - 1]; // O ultimo é o atual
+          document.getElementById('valCO2').innerText = latest.co2;
+          document.getElementById('valHumid').innerText = latest.humid + '%';
+          document.getElementById('valTemp').innerText = latest.temp;
+
+          chartCO2Instance = renderMiniChart('chartCO2', '#10b981', data.map(d => d.co2), chartCO2Instance);
+          chartHumidInstance = renderMiniChart('chartHumid', '#3b82f6', data.map(d => d.humid), chartHumidInstance);
+          chartTempInstance = renderMiniChart('chartTemp', '#ef4444', data.map(d => d.temp), chartTempInstance);
+
+          // Altera o pseudo valor de permanencia apenas como mock interativo com base no dado
+          document.getElementById('permanenciaTempo').innerText = (latest.co2 * 1.5).toFixed(0);
+        }
+      } catch (e) { console.error('Erro ao buscar correlacao:', e); }
     }
 
     async function carregarEventosRecentes() {
-       try {
-           const resp = await fetch('/api/sensores/eventos');
-           const eventos = await resp.json();
-           
-           const tbody = document.getElementById('tabelaEventos');
-           tbody.innerHTML = '';
-           
-           eventos.forEach(ev => {
-               tbody.innerHTML += `<tr class="table-row">
+      try {
+        const resp = await fetch('/api/sensores/eventos');
+        const eventos = await resp.json();
+
+        const tbody = document.getElementById('tabelaEventos');
+        tbody.innerHTML = '';
+
+        eventos.forEach(ev => {
+          tbody.innerHTML += `<tr class="table-row">
                 <td class="events-time">${ev.hora}</td>
                 <td>${ev.evento}</td>
                 <td>${ev.ocupacao}</td>
                 <td><span class="badge ${ev.badge}">${ev.status}</span></td>
               </tr>`;
-           });
-       } catch (e) { console.error('Erro ao buscar eventos:', e); }
+        });
+      } catch (e) { console.error('Erro ao buscar eventos:', e); }
     }
 
     async function carregarOcupacao() {
@@ -406,6 +374,8 @@
         else if (data.porcentagem > 60) barra.className = 'occupancy-meter-segment occupancy-meter-yellow';
         else barra.className = 'occupancy-meter-segment occupancy-meter-green';
 
+        document.getElementById('displayUltimaAtualizacao').innerText = data.hora_medicao;
+
       } catch (err) { console.error('Erro ao buscar ocupação:', err); }
     }
 
@@ -418,7 +388,7 @@
         const values = data.map(d => d.pessoas);
 
         const ctx = document.getElementById('fluxoOcupacaoChart').getContext('2d');
-        if(fluxoChartInstance) fluxoChartInstance.destroy();
+        if (fluxoChartInstance) fluxoChartInstance.destroy();
 
         fluxoChartInstance = new Chart(ctx, {
           type: 'line',
@@ -448,10 +418,10 @@
 
     // Refresh general
     function reloadAllData() {
-        carregarOcupacao();
-        carregarGraficoFluxo();
-        carregarCorrelacaoAmbiental();
-        carregarEventosRecentes();
+      carregarOcupacao();
+      carregarGraficoFluxo();
+      carregarCorrelacaoAmbiental();
+      carregarEventosRecentes();
     }
 
     reloadAllData();

@@ -3989,3 +3989,8 @@ html.dark .events-table-head {
   gap: 1.5rem;
 }
 
+
+/* Zombie Sensor Warning */
+.zombie-warning-wrapper { display: flex; align-items: center; justify-content: center; position: absolute; top: 0.5rem; right: 0.5rem; }
+.zombie-icon { color: #64748b; font-size: 1.1rem !important; animation: pulse-subtle 2s infinite; cursor: help; }
+@keyframes pulse-subtle { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }

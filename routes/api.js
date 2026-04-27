@@ -26,6 +26,17 @@ function calcStatus(co2, voc, limCO2Crit, limCO2Aten, limVOCCrit, limVOCAtencao)
     return "NORMAL";
 }
 
+/**
+ * Retorna o timestamp do dado mais recente disponível no banco.
+ * Usado como âncora para todas as janelas temporais das queries,
+ * garantindo que o dashboard sempre mostre dados mesmo que o scraper
+ * esteja usando um delay (ex: 2 dias para trás).
+ */
+async function getLatestTimestamp() {
+    const [[creative]] = await db.query(`SELECT MAX(data) AS ts FROM creative`);
+    return creative.ts || new Date();
+}
+
 // ============================================================
 // ROTA 0: Lista de Setores (usada por dropdowns nas views)
 // ============================================================
@@ -47,18 +58,18 @@ router.get("/setores", wrap(async (req, res) => {
 //         Usado pelos KPI cards de tendencia.ejs
 // ============================================================
 router.get("/sensores/resumo", wrap(async (req, res) => {
-    // Período atual vs período anterior (janela de 24h)
+    const anchor = await getLatestTimestamp();
     const [atual] = await db.query(`
         SELECT AVG(co2) co2, AVG(voc) voc, AVG(temperatura) temp, AVG(umidade) umidade,
                DATE_FORMAT(MAX(data),'%H:%i') hora_medicao
         FROM creative
-        WHERE data >= DATE_SUB(NOW(), INTERVAL 1 DAY)
-    `);
+        WHERE data >= DATE_SUB(?, INTERVAL 1 DAY)
+    `, [anchor]);
     const [anterior] = await db.query(`
         SELECT AVG(co2) co2, AVG(voc) voc, AVG(temperatura) temp, AVG(umidade) umidade
         FROM creative
-        WHERE data BETWEEN DATE_SUB(NOW(), INTERVAL 2 DAY) AND DATE_SUB(NOW(), INTERVAL 1 DAY)
-    `);
+        WHERE data BETWEEN DATE_SUB(?, INTERVAL 2 DAY) AND DATE_SUB(?, INTERVAL 1 DAY)
+    `, [anchor, anchor]);
 
     const a = atual[0];
     const b = anterior[0];
@@ -151,10 +162,12 @@ router.get("/graficos/ocupacao", wrap(async (req, res) => {
 // ============================================================
 router.get("/graficos/ambiental", wrap(async (req, res) => {
     const periodo = req.query.periodo || "24h";
-    let interval;
-    if (periodo === "7d")  interval = "7 DAY";
-    else if (periodo === "30d") interval = "30 DAY";
-    else interval = "1 DAY";
+    let intervalHours;
+    if (periodo === "7d")  intervalHours = 7 * 24;
+    else if (periodo === "30d") intervalHours = 30 * 24;
+    else intervalHours = 24;
+
+    const anchor = await getLatestTimestamp();
 
     // Agrupa por hora para reduzir pontos e melhorar performance
     const [rows] = await db.query(`
@@ -163,10 +176,10 @@ router.get("/graficos/ambiental", wrap(async (req, res) => {
             AVG(temperatura) AS temp, AVG(umidade) AS humid,
             DATE_FORMAT(data,'%d/%m %H:%i') AS hora
         FROM creative
-        WHERE data >= DATE_SUB(NOW(), INTERVAL ${interval})
+        WHERE data >= DATE_SUB(?, INTERVAL ${intervalHours} HOUR)
         GROUP BY DATE_FORMAT(data,'%Y-%m-%d %H')
         ORDER BY MIN(data)
-    `);
+    `, [anchor]);
 
     res.json(rows.map(r => ({
         co2:   parseFloat((r.co2   || 0).toFixed(1)),
@@ -200,32 +213,32 @@ router.get("/dashboard/resumo", wrap(async (req, res) => {
     if (leitura.co2 > 1000 || leitura.voc > 400) status_geral = "CRITICO";
     else if (leitura.co2 > 800 || leitura.voc > 250) status_geral = "ATENCAO";
 
-    // Setores que tiveram a maior leitura de CO2 (último dia)
+    const anchor = await getLatestTimestamp();
     const [picoCO2] = await db.query(`
         SELECT st.nome_setor, MAX(c.co2) AS valor
         FROM creative c
         JOIN sensores s ON s.id_sensor = c.id_sensor
         JOIN setores st ON st.id_setor = s.id_setor
-        WHERE c.data >= DATE_SUB(NOW(), INTERVAL 1 DAY)
+        WHERE c.data >= DATE_SUB(?, INTERVAL 1 DAY)
         GROUP BY st.nome_setor
         ORDER BY valor DESC LIMIT 1
-    `);
+    `, [anchor]);
     const [picoVOC] = await db.query(`
         SELECT st.nome_setor, MAX(c.voc) AS valor
         FROM creative c
         JOIN sensores s ON s.id_sensor = c.id_sensor
         JOIN setores st ON st.id_setor = s.id_setor
-        WHERE c.data >= DATE_SUB(NOW(), INTERVAL 1 DAY)
+        WHERE c.data >= DATE_SUB(?, INTERVAL 1 DAY)
         GROUP BY st.nome_setor
         ORDER BY valor DESC LIMIT 1
-    `);
+    `, [anchor]);
 
-    // Eventos de odor hoje (VOC acima de atenção)
+    // Eventos de odor na janela atual (VOC acima de atenção)
     const [eventosOdor] = await db.query(`
         SELECT COUNT(*) AS total FROM alertas
         WHERE parametro = 'VOC' AND severidade != 'NORMAL'
-        AND disparado_em >= CURDATE()
-    `);
+        AND disparado_em >= DATE_SUB(?, INTERVAL 1 DAY)
+    `, [anchor]);
 
     // Sensores ativos
     const [sensoresAtivos] = await db.query(
@@ -270,19 +283,20 @@ router.get("/dashboard/heatmap", wrap(async (req, res) => {
             SELECT co2, voc FROM creative ORDER BY data DESC LIMIT 1
         `);
 
-        // Histórico de 6 leituras de CO2 (sparkline)
+        // Histórico de 6 leituras de CO2 (sparkline ancorado no último dado disponível)
+        const heatmapAnchor = await getLatestTimestamp();
         const [historicoCO2] = await db.query(`
             SELECT AVG(co2) AS co2 FROM creative
-            WHERE data >= DATE_SUB(NOW(), INTERVAL 6 HOUR)
+            WHERE data >= DATE_SUB(?, INTERVAL 6 HOUR)
             GROUP BY DATE_FORMAT(data,'%Y-%m-%d %H')
             ORDER BY MIN(data) DESC LIMIT 6
-        `);
+        `, [heatmapAnchor]);
 
         // Alertas nas últimas 24h para esse setor
         const [alertas24h] = await db.query(`
             SELECT COUNT(*) AS total FROM alertas
-            WHERE id_setor = ? AND disparado_em >= DATE_SUB(NOW(), INTERVAL 1 DAY)
-        `, [setor.id_setor]);
+            WHERE id_setor = ? AND disparado_em >= DATE_SUB(?, INTERVAL 1 DAY)
+        `, [setor.id_setor, heatmapAnchor]);
 
         const co2 = ultimaCreative[0] ? ultimaCreative[0].co2 : 0;
         const voc = ultimaCreative[0] ? ultimaCreative[0].voc : 0;
@@ -448,7 +462,12 @@ router.get("/sensores/eventos", wrap(async (req, res) => {
         ORDER BY data DESC LIMIT 12
     `, [sensor[0].id_sensor]);
 
-    const capacidade = 25; // default; idealmente buscar do setores
+    const [setor] = await db.query(
+        `SELECT capacidade_maxima FROM setores WHERE id_setor = ?`,
+        [id_setor]
+    );
+    const capacidade = setor[0] ? setor[0].capacidade_maxima : 25;
+
     const eventos = [];
     for (let i = 0; i < rows.length - 1; i++) {
         const diff = rows[i].pessoas - rows[i + 1].pessoas;

@@ -21,6 +21,7 @@ BASE_URL = "https://iagen.espm.br/sensores/dados"
 # MAPEAMENTO: id_sensor real → id_setor hospitalar simulado
 # (deve ser consistente com o INSERT do script_inicial.sql)
 # ============================================================
+
 SENSOR_SETOR_MAP = {
     1: (1, "MULTISENSOR"),  # Creative → UTI (referência ambiental)
     2: (3, "HPD2"),         # PCA → Enfermaria Ala B
@@ -52,9 +53,14 @@ def garantir_sensor_existe(id_sensor):
         )
         conn.commit()
 
-def buscar_dados(tipo_sensor, dias=2):
-    """Busca dados na API baseada no tipo (creative ou pca)."""
-    hoje = datetime.now()
+def buscar_dados_inicial(tipo_sensor, dias=2):
+    """Carga inicial: busca por janela de datas (comportamento original).
+
+    QUERY_OFFSET_DAYS: deslocamento fixo para trás para garantir que
+    sempre haja dados na janela buscada, independentemente do horário atual.
+    """
+    QUERY_OFFSET_DAYS = 0  # dias de delay garantido
+    hoje = datetime.now() +timedelta(days=QUERY_OFFSET_DAYS+1)
     inicio = hoje - timedelta(days=dias)
     url = f"{BASE_URL}?sensor={tipo_sensor}&data_inicial={inicio.date()}&data_final={hoje.date()}"
 
@@ -63,25 +69,53 @@ def buscar_dados(tipo_sensor, dias=2):
         if resposta.status_code == 200:
             dados = resposta.json()
             print(f"  📡 {tipo_sensor}: {len(dados)} registros recebidos da API")
+            print(f"  📝 {url}")
             return dados
         print(f"  ❌ Erro API {tipo_sensor}: Status {resposta.status_code}")
     except Exception as e:
         print(f"  ❌ Erro conexão {tipo_sensor}: {e}")
     return []
 
+def buscar_dados_novos(tipo_sensor, id_inferior):
+    """Refresh incremental: busca apenas registros com id > id_inferior."""
+    url = f"{BASE_URL}?sensor={tipo_sensor}&id_inferior={id_inferior}"
+    try:
+        resposta = requests.get(url, verify=False, timeout=15)
+        if resposta.status_code == 200:
+            dados = resposta.json()
+            print(f"  📡 {tipo_sensor} (refresh id>{id_inferior}): {len(dados)} novos registros")
+            print(f"  📝 {url}")
+            return dados
+        print(f"  ❌ Erro API {tipo_sensor}: Status {resposta.status_code}")
+    except Exception as e:
+        print(f"  ❌ Erro conexão {tipo_sensor}: {e}")
+    return []
+
+def get_ultimo_id_creative():
+    """Retorna o maior id já armazenado na tabela creative, ou None."""
+    cursor.execute("SELECT MAX(id) FROM creative")
+    row = cursor.fetchone()
+    return row[0] if row and row[0] is not None else None
+
+def get_ultimo_id_pca():
+    """Retorna o maior id já armazenado na tabela pca, ou None."""
+    cursor.execute("SELECT MAX(id) FROM pca")
+    row = cursor.fetchone()
+    return row[0] if row and row[0] is not None else None
+
 def inserir_creative(dados):
     if not dados:
         print("  ⚠️  Creative: nenhum dado recebido.")
         return
     sql = """
-    INSERT INTO creative (data, id_sensor, delta, luminosidade, umidade, temperatura,
+    INSERT INTO creative (id, data, id_sensor, delta, luminosidade, umidade, temperatura,
     voc, co2, pressao_ar, ruido, aerosol_parado, aerosol_risco, ponto_orvalho)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
     cont = 0
     for d in dados:
         garantir_sensor_existe(d["id_sensor"])
-        valores = (d["data"], d["id_sensor"], d["delta"], d["luminosidade"], d["umidade"],
+        valores = (d["id"], d["data"], d["id_sensor"], d["delta"], d["luminosidade"], d["umidade"],
                    d["temperatura"], d["voc"], d["co2"], d["pressao_ar"], d["ruido"],
                    d["aerosol_parado"], d["aerosol_risco"], d["ponto_orvalho"])
         try:
@@ -98,13 +132,13 @@ def inserir_pca(dados):
         print("  ⚠️  PCA: nenhum dado recebido.")
         return
     sql = """
-    INSERT INTO pca (data, id_sensor, delta, pessoas, luminosidade, umidade, temperatura)
-    VALUES (%s, %s, %s, %s, %s, %s, %s)
+    INSERT INTO pca (id, data, id_sensor, delta, pessoas, luminosidade, umidade, temperatura)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     """
     cont = 0
     for d in dados:
         garantir_sensor_existe(d["id_sensor"])
-        valores = (d["data"], d["id_sensor"], d["delta"], d["pessoas"],
+        valores = (d["id"], d["data"], d["id_sensor"], d["delta"], d["pessoas"],
                    d["luminosidade"], d["umidade"], d["temperatura"])
         try:
             cursor.execute(sql, valores)
@@ -120,18 +154,43 @@ if __name__ == "__main__":
     print("  Sistema de Sincronização — Sensores ESPM → MySQL")
     print("=" * 55)
 
+    timeInterval = 60  # EM SEGUNDOS
+    primeira_execucao = True
+
     while True:
         try:
             print(f"\n🚀 [{datetime.now().strftime('%H:%M:%S')}] Iniciando sincronização...")
 
-            dados_creative = buscar_dados("creative", dias=2)
-            inserir_creative(dados_creative)
+            if primeira_execucao:
+                # ── Carga inicial por janela de datas ──────────────────
+                print("  🔄 Modo: carga inicial (janela de datas)")
+                dados_creative = buscar_dados_inicial("creative", dias=1)
+                inserir_creative(dados_creative)
 
-            dados_pca = buscar_dados("pca", dias=2)
-            inserir_pca(dados_pca)
+                dados_pca = buscar_dados_inicial("pca", dias=1)
+                inserir_pca(dados_pca)
 
-            print(f"🏁 Concluído. Próxima sincronização em 10 segundos...")
+                primeira_execucao = False
+            else:
+                # ── Refresh incremental via id_inferior ────────────────
+                print("  🔄 Modo: refresh incremental (id_inferior)")
+
+                ultimo_id_creative = get_ultimo_id_creative()
+                if ultimo_id_creative is not None:
+                    dados_creative = buscar_dados_novos("creative", ultimo_id_creative)
+                    inserir_creative(dados_creative)
+                else:
+                    print("  ⚠️  Creative: sem registros base, pulando refresh.")
+
+                ultimo_id_pca = get_ultimo_id_pca()
+                if ultimo_id_pca is not None:
+                    dados_pca = buscar_dados_novos("pca", ultimo_id_pca)
+                    inserir_pca(dados_pca)
+                else:
+                    print("  ⚠️  PCA: sem registros base, pulando refresh.")
+
+            print(f"🏁 Concluído. Próxima sincronização em {timeInterval} segundos...")
         except Exception as e:
             print(f"❌ Erro no loop principal: {e}")
 
-        time.sleep(10)
+        time.sleep(timeInterval)
