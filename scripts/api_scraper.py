@@ -15,7 +15,7 @@ conn = mysql.connector.connect(
 )
 cursor = conn.cursor()
 
-BASE_URL = "https://iagen.espm.br/sensores/dados"
+BASE_URL = "http://iagen.espm.br/sensores/dados"
 
 # ============================================================
 # MAPEAMENTO: id_sensor real → id_setor hospitalar simulado
