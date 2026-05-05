@@ -104,6 +104,7 @@ app.use((req, res, next) => {
 
 // Cadastros simples
 app.use("/", require("./routes/index"));
+app.use("/api", require("./routes/api"));
 
 // Depois de registrados todos os caminhos das rotas e seus
 // tratadores, registramos os tratadores que serão chamados
