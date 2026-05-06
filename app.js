@@ -21,6 +21,7 @@ const express = require("express");
 const path = require("path");
 const wrap = require("express-async-error-wrapper");
 const cookieParser = require("cookie-parser"); // https://stackoverflow.com/a/16209531/3569421
+const session = require("express-session");
 // const sql = require("./data/sql");
 
 require("dotenv").config({ encoding: "utf8" });
@@ -76,6 +77,35 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 app.use(require("express-ejs-layouts"));
 
+app.use(session({
+	secret: "projeto-sensores-secret",
+	resave: true,
+	saveUninitialized: true,
+	cookie: {
+		secure: false,
+		maxAge: 3600000 * 24 // 24 horas
+	}
+}));
+
+// Middleware de Autenticação
+app.use((req, res, next) => {
+	const rotasPublicas = ["/login", "/completar-perfil", "/api/auth/login", "/api/auth/signup", "/api/auth/completar-perfil"];
+	if (rotasPublicas.includes(req.path) || req.path.startsWith("/public")) {
+		return next();
+	}
+
+	if (req.session.usuario) {
+		// Se logado mas perfil incompleto, obriga a completar
+		if (!req.session.usuario.perfilCompleto && req.path !== "/completar-perfil") {
+			return res.redirect("/completar-perfil");
+		}
+		res.locals.usuario = req.session.usuario;
+		return next();
+	}
+
+	res.redirect("/login");
+});
+
 // Nosso middleware para evitar cache das páginas e api
 // (deixa depois do static, pois os arquivos static devem usar cache e coisas)
 app.use((req, res, next) => {
@@ -103,6 +133,7 @@ app.use((req, res, next) => {
 // https://expressjs.com/en/guide/routing.html
 
 // Cadastros simples
+app.use("/", require("./routes/auth"));
 app.use("/", require("./routes/index"));
 app.use("/api", require("./routes/api"));
 
