@@ -32,9 +32,20 @@ function calcStatus(co2, voc, limCO2Crit, limCO2Aten, limVOCCrit, limVOCAtencao)
  * garantindo que o dashboard sempre mostre dados mesmo que o scraper
  * esteja usando um delay (ex: 2 dias para trás).
  */
+/**
+ * Retorna o timestamp do dado mais recente disponível no banco.
+ */
 async function getLatestTimestamp() {
     const [[creative]] = await db.query(`SELECT MAX(data) AS ts FROM creative`);
     return creative.ts || new Date();
+}
+
+/**
+ * Retorna o timestamp do alerta mais recente.
+ */
+async function getLatestAlertTimestamp() {
+    const [[alertas]] = await db.query(`SELECT MAX(disparado_em) AS ts FROM alertas`);
+    return alertas.ts || new Date();
 }
 
 // ============================================================
@@ -336,7 +347,7 @@ router.get("/alertas", wrap(async (req, res) => {
 
     const [rows] = await db.query(`
         SELECT
-            a.id_alerta,
+            a.id_alerta, a.id_setor,
             a.parametro, a.valor_medido, a.limite_referencia, a.unidade,
             a.severidade, a.status,
             DATE_FORMAT(a.disparado_em,'%d/%m %H:%i:%s') AS data_hora,
@@ -359,32 +370,38 @@ router.get("/alertas", wrap(async (req, res) => {
 //         Usado pela central_alerta.ejs
 // ============================================================
 router.get("/alertas/kpis", wrap(async (req, res) => {
-    // KPIs da última semana
+    const anchor = await getLatestAlertTimestamp();
+
+    // KPIs da última semana (baseado na âncora)
     const [kpis] = await db.query(`
         SELECT
             COUNT(*) AS total_alertas,
             AVG(TIMESTAMPDIFF(MINUTE, disparado_em, atendimento_iniciado_em)) AS tempo_medio_resposta_min,
             AVG(TIMESTAMPDIFF(MINUTE, disparado_em, normalizado_em))           AS tempo_medio_resolucao_min,
-            SUM(CASE WHEN atendimento_iniciado_em IS NOT NULL
-                      AND TIMESTAMPDIFF(MINUTE, disparado_em, atendimento_iniciado_em) <= 15
-                THEN 1 ELSE 0 END) / COUNT(*) * 100                            AS pct_resposta_no_sla
+            CASE 
+                WHEN COUNT(*) > 0 THEN
+                    SUM(CASE WHEN atendimento_iniciado_em IS NOT NULL
+                              AND TIMESTAMPDIFF(MINUTE, disparado_em, atendimento_iniciado_em) <= 15
+                        THEN 1 ELSE 0 END) / COUNT(*) * 100
+                ELSE 0 
+            END AS pct_resposta_no_sla
         FROM alertas
-        WHERE disparado_em >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-    `);
+        WHERE disparado_em >= DATE_SUB(?, INTERVAL 7 DAY)
+    `, [anchor]);
 
-    // Semana anterior para calcular variação
+    // Semana anterior para calcular variação (8 a 14 dias atrás da âncora)
     const [kpisAnterior] = await db.query(`
         SELECT AVG(TIMESTAMPDIFF(MINUTE, disparado_em, atendimento_iniciado_em)) AS tempo_medio
         FROM alertas
-        WHERE disparado_em BETWEEN DATE_SUB(NOW(), INTERVAL 14 DAY) AND DATE_SUB(NOW(), INTERVAL 7 DAY)
-    `);
+        WHERE disparado_em BETWEEN DATE_SUB(?, INTERVAL 14 DAY) AND DATE_SUB(?, INTERVAL 7 DAY)
+    `, [anchor, anchor]);
 
-    // Setores com alerta CRITICO aberto agora
+    // Setores com alerta CRITICO aberto agora (ou na data do último alerta)
     const [setoresCriticos] = await db.query(`
         SELECT DISTINCT st.nome_setor
         FROM alertas a
         JOIN setores st ON st.id_setor = a.id_setor
-        WHERE a.sevEridade = 'CRITICO' AND a.status = 'ABERTO'
+        WHERE a.severidade = 'CRITICO' AND a.status = 'ABERTO'
     `);
 
     const tmAtual    = kpis[0].tempo_medio_resposta_min || 0;
@@ -406,16 +423,18 @@ router.get("/alertas/kpis", wrap(async (req, res) => {
 //         Mini gráfico de barras da central_alerta.ejs
 // ============================================================
 router.get("/alertas/historico", wrap(async (req, res) => {
+    const anchor = await getLatestAlertTimestamp();
+
     const [rows] = await db.query(`
         SELECT
             DATE_FORMAT(disparado_em,'%d/%m') AS dia,
             COUNT(*) AS total_disparados,
             SUM(CASE WHEN status = 'RESOLVIDO' THEN 1 ELSE 0 END) AS total_resolvidos
         FROM alertas
-        WHERE disparado_em >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        WHERE disparado_em >= DATE_SUB(?, INTERVAL 7 DAY)
         GROUP BY DATE(disparado_em)
         ORDER BY DATE(disparado_em)
-    `);
+    `, [anchor]);
     res.json(rows);
 }));
 

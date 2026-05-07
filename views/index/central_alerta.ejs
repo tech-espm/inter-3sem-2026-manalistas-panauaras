@@ -1,434 +1,964 @@
-
-    <div class="layout-root">
-      <div class="layout-container">
-        <!-- Topbar -->
-        <header class="topbar">
-          <div class="topbar-left">
-            <div class="topbar-title-group">
-              <span class="material-symbols-outlined topbar-logo-icon">
-                medical_services
-              </span>
-              <h2 class="topbar-title">Central de Alertas</h2>
-            </div>
-
-            <label class="search-wrapper">
-              <div class="search-input-container">
-                <div class="search-icon-wrapper">
-                  <span class="material-symbols-outlined search-icon">
-                    search
-                  </span>
-                </div>
-                <input
-                  class="search-input"
-                  placeholder="Pesquisar setor ou alerta..."
-                  value=""
-                />
-              </div>
-            </label>
-          </div>
-
-          <div class="topbar-right">
-            <div class="topbar-icon-group">
-              <button class="icon-button icon-button-soft-primary">
-                <span class="material-symbols-outlined">notifications</span>
-              </button>
-              <button class="icon-button icon-button-soft-primary">
-                <span class="material-symbols-outlined">settings</span>
-              </button>
-            </div>
-            <div class="user-info">
-              <div class="user-meta">
-                <p class="user-name">Dr. Ricardo Silva</p>
-                <p class="user-role">Gestor de Operações</p>
-              </div>
-              <div class="user-avatar">
-                <span class="material-symbols-outlined user-avatar-icon">
-                  account_circle
-                </span>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <div class="central-layout">
-          <!-- Sidebar -->
-          
-
-          <!-- Main -->
-          <main class="central-main">
-            <!-- KPIs -->
-            <section class="kpi-grid">
-              <div class="kpi-card">
-                <div class="kpi-header">
-                  <p class="kpi-label">Tempo de Resposta (7d)</p>
-                  <span class="material-symbols-outlined kpi-icon-primary">timer</span>
-                </div>
-                <p id="kpiTempoResposta" class="kpi-value">-- min</p>
-                <div id="kpiTendenciaWrapper" class="kpi-trend kpi-trend-down">
-                  <span class="material-symbols-outlined kpi-trend-icon">trending_down</span>
-                  <p id="kpiVariacaoTexto" class="kpi-trend-text">-- % vs sem. anterior</p>
-                </div>
-              </div>
-
-              <div class="kpi-card">
-                <div class="kpi-header">
-                  <p class="kpi-label">Resolvidos no SLA</p>
-                  <span class="material-symbols-outlined kpi-icon-primary">verified</span>
-                </div>
-                <p id="kpiSLA" class="kpi-value">--%</p>
-                <div class="kpi-trend kpi-trend-up">
-                  <span class="material-symbols-outlined kpi-trend-icon">verified</span>
-                  <p class="kpi-trend-text">Meta: 90%</p>
-                </div>
-              </div>
-
-              <div class="kpi-card">
-                <div class="kpi-header">
-                  <p class="kpi-label">Setores Críticos</p>
-                  <span class="material-symbols-outlined kpi-icon-primary">priority_high</span>
-                </div>
-                <p id="kpiSetoresCriticos" class="kpi-value">--</p>
-                <p class="kpi-subtext">Baseado em incidência</p>
-              </div>
-
-              <div class="kpi-card">
-                <p class="kpi-label mb-2">Alertas vs Resolução</p>
-                <div id="miniChartContainer" class="bar-mini-chart">
-                  <p style="opacity:0.4;font-size:0.7rem">Carregando...</p>
-                </div>
-                <p class="bar-mini-legend">Últimos 7 dias</p>
-              </div>
-            </section>
-
-            <!-- Tabela de alertas -->
-            <section class="card alerts-card">
-              <div class="alerts-header">
-                <div class="alerts-filters">
-                  <button class="filter-chip">
-                    <span class="material-symbols-outlined filter-chip-icon">
-                      filter_alt
-                    </span>
-                    Filtrar Setor
-                    <span class="material-symbols-outlined filter-chip-icon">
-                      expand_more
-                    </span>
-                  </button>
-                  <button class="filter-chip">
-                    Tipo de Problema
-                    <span class="material-symbols-outlined filter-chip-icon">
-                      expand_more
-                    </span>
-                  </button>
-                  <button class="filter-chip">
-                    Gravidade
-                    <span class="material-symbols-outlined filter-chip-icon">
-                      expand_more
-                    </span>
-                  </button>
-                  <button class="filter-chip">
-                    Status
-                    <span class="material-symbols-outlined filter-chip-icon">
-                      expand_more
-                    </span>
-                  </button>
-                </div>
-                <button class="primary-action-button">
-                  <span class="material-symbols-outlined primary-action-icon">
-                    cleaning_services
-                  </span>
-                  Novo Ticket de Manutenção
-                </button>
-              </div>
-
-              <div class="table-wrapper">
-                <table class="table">
-                  <thead>
-                    <tr class="table-head-row">
-                      <th>Data/Hora</th>
-                      <th>Ambiente</th>
-                      <th>Tipo Alerta</th>
-                      <th>Gravidade</th>
-                      <th>SLA (Restante)</th>
-                      <th>Status</th>
-                      <th class="table-head-actions">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody id="alertasTbody">
-                    <tr><td colspan="7" style="text-align:center;opacity:0.5;padding:1rem">Carregando alertas...</td></tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div class="alerts-footer">
-                <p id="alertasFooterText" class="alerts-footer-text">Mostrando -- alertas</p>
-                <div class="alerts-pagination">
-                  <button class="pagination-button"><span class="material-symbols-outlined pagination-icon">chevron_left</span></button>
-                  <button class="pagination-button"><span class="material-symbols-outlined pagination-icon">chevron_right</span></button>
-                </div>
-              </div>
-            </section>
-
-            <!-- Gráfico + Ações rápidas -->
-            <section class="detail-grid">
-              <div class="card sensor-detail-card">
-                <div class="detail-badge-wrapper">
-                  <span class="detail-badge">
-                    Vista de Detalhe Ativa
-                  </span>
-                </div>
-                <h3 class="detail-title">
-                  <span class="material-symbols-outlined detail-title-icon">
-                    analytics
-                  </span>
-                  Curva do Sensor: CO2 (UTI 2 - Leito 04)
-                </h3>
-
-                <div class="sensor-chart">
-                  <div class="sensor-threshold">
-                    <span class="sensor-threshold-label">
-                      LIMITE CRÍTICO
-                    </span>
-                  </div>
-
-                  <div class="sensor-bar sensor-bar-soft h-35"></div>
-                  <div class="sensor-bar sensor-bar-soft h-32"></div>
-                  <div class="sensor-bar sensor-bar-soft h-38"></div>
-                  <div class="sensor-bar sensor-bar-soft h-42"></div>
-                  <div class="sensor-bar sensor-bar-critical h-75"></div>
-                  <div class="sensor-bar sensor-bar-critical h-85"></div>
-                  <div class="sensor-bar sensor-bar-critical-soft h-65"></div>
-                  <div class="sensor-bar sensor-bar-soft h-55"></div>
-                  <div class="sensor-bar sensor-bar-soft h-40"></div>
-                  <div class="sensor-bar sensor-bar-soft h-35"></div>
-                </div>
-
-                <div class="sensor-chart-legend">
-                  <span>13:00</span>
-                  <span>13:30</span>
-                  <span class="sensor-chart-legend-highlight">
-                    14:00 (Início Alerta)
-                  </span>
-                  <span>14:30</span>
-                  <span>Agora</span>
-                </div>
-
-                <div class="detail-bottom-grid">
-                  <div class="detail-logs">
-                    <h4 class="detail-subtitle">
-                      Logs de Intervenção
-                    </h4>
-                    <div class="detail-log-list">
-                      <div class="detail-log-item">
-                        <div class="detail-log-line"></div>
-                        <div>
-                          <p class="detail-log-title">
-                            14:22 - Equipe de Manutenção Acionada
-                          </p>
-                          <p class="detail-log-text">
-                            Verificação de exaustão mecânica iniciada.
-                          </p>
-                        </div>
-                      </div>
-                      <div class="detail-log-item">
-                        <div class="detail-log-line"></div>
-                        <div>
-                          <p class="detail-log-title">
-                            14:05 - Notificação enviada à Enfermagem
-                          </p>
-                          <p class="detail-log-text">
-                            Confirmação de recebimento: Enf. Marcos.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="detail-responsible">
-                    <h4 class="detail-subtitle">
-                      Responsável Atual
-                    </h4>
-                    <div class="detail-responsible-row">
-                      <div class="detail-responsible-avatar">
-                        <span
-                          class="material-symbols-outlined detail-responsible-icon"
-                        >
-                          person
-                        </span>
-                      </div>
-                      <div>
-                        <p class="detail-responsible-name">
-                          Eng. Carla Mendes
-                        </p>
-                        <p class="detail-responsible-role">
-                          Engenharia Clínica / Manutenção
-                        </p>
-                      </div>
-                    </div>
-                    <button class="detail-transfer-button">
-                      Transferir Responsabilidade
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div class="card quick-actions-card">
-                <h3 class="quick-actions-title">Ações Rápidas</h3>
-                <div class="quick-actions-list">
-                  <button class="quick-action quick-action-primary">
-                    <div class="quick-action-left">
-                      <div class="quick-action-icon primary">
-                        <span class="material-symbols-outlined">
-                          cleaning_services
-                        </span>
-                      </div>
-                      <div class="quick-action-text">
-                        <p class="quick-action-title">
-                          Ticket de Limpeza
-                        </p>
-                        <p class="quick-action-subtitle">
-                          Acionamento imediato
-                        </p>
-                      </div>
-                    </div>
-                    <span
-                      class="material-symbols-outlined quick-action-arrow"
-                    >
-                      chevron_right
-                    </span>
-                  </button>
-
-                  <button class="quick-action">
-                    <div class="quick-action-left">
-                      <div class="quick-action-icon neutral">
-                        <span class="material-symbols-outlined">
-                          build
-                        </span>
-                      </div>
-                      <div class="quick-action-text">
-                        <p class="quick-action-title">
-                          Ticket de Manutenção
-                        </p>
-                        <p class="quick-action-subtitle">
-                          Elétrica, Ar e Estrutural
-                        </p>
-                      </div>
-                    </div>
-                    <span
-                      class="material-symbols-outlined quick-action-arrow"
-                    >
-                      chevron_right
-                    </span>
-                  </button>
-
-                  <button class="quick-action">
-                    <div class="quick-action-left">
-                      <div class="quick-action-icon neutral">
-                        <span class="material-symbols-outlined">
-                          security
-                        </span>
-                      </div>
-                      <div class="quick-action-text">
-                        <p class="quick-action-title">
-                          Chamada de Segurança
-                        </p>
-                        <p class="quick-action-subtitle">
-                          Apoio em intercorrências
-                        </p>
-                      </div>
-                    </div>
-                    <span
-                      class="material-symbols-outlined quick-action-arrow"
-                    >
-                      chevron_right
-                    </span>
-                  </button>
-
-                  <div class="integrations-card">
-                    <p class="integrations-title">
-                      SISTEMAS INTEGRADOS
-                    </p>
-                    <div class="integrations-tags">
-                      <span class="integration-tag">HIS v4.2</span>
-                      <span class="integration-tag">SCADA</span>
-                      <span class="integration-tag">BMS Cloud</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </main>
+<div class="layout-root">
+  <div class="layout-container">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-logo">
+          <span class="material-symbols-outlined topbar-logo-icon">analytics</span>
+        </div>
+        <div class="topbar-title-group">
+          <h1 class="topbar-title">Central de Alertas</h1>
+          <p class="topbar-subtitle">Monitoramento e Gestão de Incidentes</p>
         </div>
       </div>
+    </header>
+
+    <div class="central-layout">
+      <!-- Sidebar -->
+
+
+      <!-- Main -->
+      <main class="central-main">
+        <!-- KPIs -->
+        <section class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <p class="kpi-label">Tempo de Resposta (7d)</p>
+              <span class="material-symbols-outlined kpi-icon-primary">timer</span>
+            </div>
+            <p id="kpiTempoResposta" class="kpi-value">-- min</p>
+            <div id="kpiTendenciaWrapper" class="kpi-trend kpi-trend-down">
+              <span class="material-symbols-outlined kpi-trend-icon">trending_down</span>
+              <p id="kpiVariacaoTexto" class="kpi-trend-text">-- % vs sem. anterior</p>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <p class="kpi-label">Resolvidos no SLA</p>
+              <span class="material-symbols-outlined kpi-icon-primary">verified</span>
+            </div>
+            <p id="kpiSLA" class="kpi-value">--%</p>
+            <div class="kpi-trend kpi-trend-up">
+              <span class="material-symbols-outlined kpi-trend-icon">verified</span>
+              <p class="kpi-trend-text">Meta: 90%</p>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <p class="kpi-label">Setores Críticos</p>
+              <span class="material-symbols-outlined kpi-icon-primary">priority_high</span>
+            </div>
+            <p id="kpiSetoresCriticos" class="kpi-value">--</p>
+            <p class="kpi-subtext">Baseado em incidência</p>
+          </div>
+
+          <div class="kpi-card">
+            <p class="kpi-label mb-2">Alertas vs Resolução</p>
+            <div id="miniChartContainer" class="bar-mini-chart">
+              <p style="opacity:0.4;font-size:0.7rem">Carregando...</p>
+            </div>
+            <p class="bar-mini-legend">Últimos 7 dias</p>
+          </div>
+        </section>
+
+        <!-- Tabela de alertas -->
+        <section class="card alerts-card">
+          <div class="alerts-header">
+            <div class="alerts-filters">
+              <div class="filter-wrapper">
+                <button class="filter-chip" id="filterSetorBtn">
+                  <span class="material-symbols-outlined filter-chip-icon">filter_alt</span>
+                  Setor: <span class="filter-current">Todos</span>
+                  <span class="material-symbols-outlined filter-chip-icon">expand_more</span>
+                </button>
+                <div class="filter-dropdown" id="dropdownSetor">
+                  <div class="filter-option active" data-value="all">Todos os Setores</div>
+                  <div class="filter-divider"></div>
+                  <div id="setoresOptions"></div>
+                </div>
+              </div>
+
+              <div class="filter-wrapper">
+                <button class="filter-chip" id="filterTipoBtn">
+                  Tipo: <span class="filter-current">Todos</span>
+                  <span class="material-symbols-outlined filter-chip-icon">expand_more</span>
+                </button>
+                <div class="filter-dropdown" id="dropdownTipo">
+                  <div class="filter-option active" data-value="all">Todos os Tipos</div>
+                  <div class="filter-divider"></div>
+                  <div class="filter-option" data-value="CO2">CO2</div>
+                  <div class="filter-option" data-value="VOC">VOC</div>
+                  <div class="filter-option" data-value="TEMPERATURA">Temperatura</div>
+                  <div class="filter-option" data-value="UMIDADE">Umidade</div>
+                  <div class="filter-option" data-value="RUIDO">Ruído</div>
+                  <div class="filter-option" data-value="PESSOAS">Ocupação</div>
+                </div>
+              </div>
+
+              <div class="filter-wrapper">
+                <button class="filter-chip" id="filterGravidadeBtn">
+                  Gravidade: <span class="filter-current">Todas</span>
+                  <span class="material-symbols-outlined filter-chip-icon">expand_more</span>
+                </button>
+                <div class="filter-dropdown" id="dropdownGravidade">
+                  <div class="filter-option active" data-value="all">Todas as Gravidades</div>
+                  <div class="filter-divider"></div>
+                  <div class="filter-option" data-value="CRITICO">
+                    <span class="material-symbols-outlined severity-icon severity-critical"
+                      style="font-size:14px">error</span>
+                    Crítico
+                  </div>
+                  <div class="filter-option" data-value="ATENCAO">
+                    <span class="material-symbols-outlined severity-icon severity-warning"
+                      style="font-size:14px">warning</span>
+                    Atenção
+                  </div>
+                </div>
+              </div>
+
+              <div class="filter-wrapper">
+                <button class="filter-chip" id="filterStatusBtn">
+                  Status: <span class="filter-current">Todos</span>
+                  <span class="material-symbols-outlined filter-chip-icon">expand_more</span>
+                </button>
+                <div class="filter-dropdown" id="dropdownStatus">
+                  <div class="filter-option active" data-value="all">Todos os Status</div>
+                  <div class="filter-divider"></div>
+                  <div class="filter-option" data-value="ABERTO">Aberto</div>
+                  <div class="filter-option" data-value="EM_ATENDIMENTO">Em Atendimento</div>
+                  <div class="filter-option" data-value="RESOLVIDO">Resolvido</div>
+                </div>
+              </div>
+
+              <button id="btnClearFilters" class="filter-chip btn-clear-filters" style="display: none;">
+                <span class="material-symbols-outlined filter-chip-icon">close</span>
+                Limpar Filtros
+              </button>
+            </div>
+            <button class="primary-action-button" onclick="openNovoTicketModal()">
+              <span class="material-symbols-outlined primary-action-icon">
+                add_circle
+              </span>
+              Novo Ticket de Manutenção
+            </button>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="table">
+              <thead>
+                <tr class="table-head-row">
+                  <th>Data/Hora</th>
+                  <th>Ambiente</th>
+                  <th>Tipo Alerta</th>
+                  <th>Gravidade</th>
+                  <th>SLA (Restante)</th>
+                  <th>Status</th>
+                  <th class="table-head-actions">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="alertasTbody">
+                <tr>
+                  <td colspan="7" style="text-align:center;opacity:0.5;padding:1rem">Carregando alertas...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="alerts-footer">
+            <p id="alertasFooterText" class="alerts-footer-text">Mostrando -- alertas</p>
+            <div class="alerts-pagination">
+              <button class="pagination-button"><span
+                  class="material-symbols-outlined pagination-icon">chevron_left</span></button>
+              <button class="pagination-button"><span
+                  class="material-symbols-outlined pagination-icon">chevron_right</span></button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Gráfico + Ações rápidas -->
+        <section class="detail-grid">
+          <div class="card sensor-detail-card">
+            <div class="detail-badge-wrapper">
+              <span class="detail-badge">
+                Vista de Detalhe Ativa
+              </span>
+            </div>
+            <h3 class="detail-title">
+              <span class="material-symbols-outlined detail-title-icon">
+                analytics
+              </span>
+              Curva do Sensor: CO2 (UTI 2 - Leito 04)
+            </h3>
+
+            <div class="sensor-chart">
+              <div class="sensor-threshold">
+                <span class="sensor-threshold-label">
+                  LIMITE CRÍTICO
+                </span>
+              </div>
+
+              <div class="sensor-bar sensor-bar-soft h-35"></div>
+              <div class="sensor-bar sensor-bar-soft h-32"></div>
+              <div class="sensor-bar sensor-bar-soft h-38"></div>
+              <div class="sensor-bar sensor-bar-soft h-42"></div>
+              <div class="sensor-bar sensor-bar-critical h-75"></div>
+              <div class="sensor-bar sensor-bar-critical h-85"></div>
+              <div class="sensor-bar sensor-bar-critical-soft h-65"></div>
+              <div class="sensor-bar sensor-bar-soft h-55"></div>
+              <div class="sensor-bar sensor-bar-soft h-40"></div>
+              <div class="sensor-bar sensor-bar-soft h-35"></div>
+            </div>
+
+            <div class="sensor-chart-legend">
+              <span>13:00</span>
+              <span>13:30</span>
+              <span class="sensor-chart-legend-highlight">
+                14:00 (Início Alerta)
+              </span>
+              <span>14:30</span>
+              <span>Agora</span>
+            </div>
+
+            <div class="detail-bottom-grid">
+              <div class="detail-logs">
+                <h4 class="detail-subtitle">
+                  Logs de Intervenção
+                </h4>
+                <div class="detail-log-list">
+                  <div class="detail-log-item">
+                    <div class="detail-log-line"></div>
+                    <div>
+                      <p class="detail-log-title">
+                        14:22 - Equipe de Manutenção Acionada
+                      </p>
+                      <p class="detail-log-text">
+                        Verificação de exaustão mecânica iniciada.
+                      </p>
+                    </div>
+                  </div>
+                  <div class="detail-log-item">
+                    <div class="detail-log-line"></div>
+                    <div>
+                      <p class="detail-log-title">
+                        14:05 - Notificação enviada à Enfermagem
+                      </p>
+                      <p class="detail-log-text">
+                        Confirmação de recebimento: Enf. Marcos.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-responsible">
+                <h4 class="detail-subtitle">
+                  Responsável Atual
+                </h4>
+                <div class="detail-responsible-row">
+                  <div class="detail-responsible-avatar">
+                    <span class="material-symbols-outlined detail-responsible-icon">
+                      person
+                    </span>
+                  </div>
+                  <div>
+                    <p class="detail-responsible-name">
+                      Eng. Carla Mendes
+                    </p>
+                    <p class="detail-responsible-role">
+                      Engenharia Clínica / Manutenção
+                    </p>
+                  </div>
+                </div>
+                <button class="detail-transfer-button">
+                  Transferir Responsabilidade
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card quick-actions-card">
+            <h3 class="quick-actions-title">Ações Rápidas</h3>
+            <div class="quick-actions-list">
+              <button class="quick-action quick-action-primary" onclick="openQuickActionModal('limpeza')">
+                <div class="quick-action-left">
+                  <div class="quick-action-icon primary">
+                    <span class="material-symbols-outlined">
+                      cleaning_services
+                    </span>
+                  </div>
+                  <div class="quick-action-text">
+                    <p class="quick-action-title">
+                      Ticket de Limpeza
+                    </p>
+                    <p class="quick-action-subtitle">
+                      Acionamento imediato
+                    </p>
+                  </div>
+                </div>
+                <span class="material-symbols-outlined quick-action-arrow">
+                  chevron_right
+                </span>
+              </button>
+
+              <button class="quick-action" onclick="openQuickActionModal('manutencao')">
+                <div class="quick-action-left">
+                  <div class="quick-action-icon neutral">
+                    <span class="material-symbols-outlined">
+                      build
+                    </span>
+                  </div>
+                  <div class="quick-action-text">
+                    <p class="quick-action-title">
+                      Ticket de Manutenção
+                    </p>
+                    <p class="quick-action-subtitle">
+                      Elétrica, Ar e Estrutural
+                    </p>
+                  </div>
+                </div>
+                <span class="material-symbols-outlined quick-action-arrow">
+                  chevron_right
+                </span>
+              </button>
+
+              <button class="quick-action" onclick="openQuickActionModal('seguranca')">
+                <div class="quick-action-left">
+                  <div class="quick-action-icon neutral">
+                    <span class="material-symbols-outlined">
+                      security
+                    </span>
+                  </div>
+                  <div class="quick-action-text">
+                    <p class="quick-action-title">
+                      Chamada de Segurança
+                    </p>
+                    <p class="quick-action-subtitle">
+                      Apoio em intercorrências
+                    </p>
+                  </div>
+                </div>
+                <span class="material-symbols-outlined quick-action-arrow">
+                  chevron_right
+                </span>
+              </button>
+
+              <div class="integrations-card">
+                <p class="integrations-title">
+                  SISTEMAS INTEGRADOS
+                </p>
+                <div class="integrations-tags">
+                  <span class="integration-tag">HIS v4.2</span>
+                  <span class="integration-tag">SCADA</span>
+                  <span class="integration-tag">BMS Cloud</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- Modals de Ações Rápidas -->
+<div id="quickActionModal" class="modal-overlay">
+  <div class="modal-container">
+    <div class="modal-header">
+      <div class="modal-title-group">
+        <span id="modalIcon" class="material-symbols-outlined modal-icon"></span>
+        <h3 id="modalTitle" class="modal-title"></h3>
+      </div>
+      <button class="modal-close" onclick="closeQuickActionModal()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
     </div>
 
+    <div class="modal-body">
+      <form id="quickActionForm" onsubmit="handleQuickActionSubmit(event)">
+        <input type="hidden" id="actionType" name="type">
+
+        <div class="form-group">
+          <label class="form-label">Setor / Localização</label>
+          <select id="modalSetor" class="form-select" required>
+            <option value="">Selecione um setor...</option>
+            <!-- Preenchido via JS -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Prioridade</label>
+          <div class="priority-options">
+            <label class="priority-radio">
+              <input type="radio" name="priority" value="baixa" checked>
+              <span class="priority-tag tag-blue">Baixa</span>
+            </label>
+            <label class="priority-radio">
+              <input type="radio" name="priority" value="media">
+              <span class="priority-tag tag-amber">Média</span>
+            </label>
+            <label class="priority-radio">
+              <input type="radio" name="priority" value="alta">
+              <span class="priority-tag tag-danger">Alta / Emergência</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Observações / Detalhes</label>
+          <textarea id="modalObs" class="form-textarea" placeholder="Descreva brevemente a necessidade..."
+            rows="3"></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-ghost" onclick="closeQuickActionModal()">Cancelar</button>
+          <button type="submit" class="btn-primary">Enviar Solicitação</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Novo Ticket Completo -->
+<div id="modalNovoTicket" class="modal-overlay">
+  <div class="modal-container" style="max-width: 550px;">
+    <div class="modal-header">
+      <div class="modal-title-group">
+        <span class="material-symbols-outlined modal-icon">add_task</span>
+        <h3 class="modal-title">Abrir Novo Ticket de Manutenção</h3>
+      </div>
+      <button class="modal-close" onclick="closeNovoTicketModal()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <form id="formNovoTicket" onsubmit="handleNovoTicketSubmit(event)">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Ambiente / Setor</label>
+            <select id="ticketSetor" class="form-select" required>
+              <option value="">Selecione...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tipo de Alerta</label>
+            <select id="ticketTipo" class="form-select" required>
+              <option value="CO2">CO2 (Qualidade do Ar)</option>
+              <option value="VOC">VOC (Odores/Gases)</option>
+              <option value="TEMPERATURA">Temperatura</option>
+              <option value="UMIDADE">Umidade</option>
+              <option value="RUIDO">Ruído</option>
+              <option value="PESSOAS">Ocupação</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Gravidade</label>
+            <select id="ticketGravidade" class="form-select" required>
+              <option value="ATENCAO">Atenção</option>
+              <option value="CRITICO">Crítico</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status Inicial</label>
+            <select id="ticketStatus" class="form-select" required>
+              <option value="ABERTO">Aberto</option>
+              <option value="EM_ATENDIMENTO">Em Atendimento</option>
+              <option value="RESOLVIDO">Resolvido</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Descrição da Ocorrência</label>
+          <textarea id="ticketDesc" class="form-textarea" placeholder="Descreva os detalhes do problema detectado..."
+            rows="3" required></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-ghost" onclick="closeNovoTicketModal()">Cancelar</button>
+          <button type="submit" class="btn-primary">Registrar Ticket</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <%- contentFor('espaco-rodape') %>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  const TAG_CLASSES = {
-    CO2:         'tag-amber',
-    VOC:         'tag-purple',
-    TEMPERATURA: 'tag-blue',
-    UMIDADE:     'tag-blue',
-    RUIDO:       'tag-amber',
-    PESSOAS:     'tag-purple',
-  };
-  const STATUS_PILLS = {
-    ABERTO:          'status-pill-danger',
-    EM_ATENDIMENTO:  'status-pill-info',
-    RESOLVIDO:       'status-pill-success',
-  };
+  <style>
+    .filter-wrapper {
+      position: relative;
+      display: inline-block;
+    }
 
-  async function carregarKPIs() {
-    try {
-      const k = await (await fetch('/api/alertas/kpis')).json();
-      document.getElementById('kpiTempoResposta').innerText =
-        `${k.tempo_medio_resposta_min || 0} min`;
-      document.getElementById('kpiSLA').innerText =
-        `${k.pct_resposta_no_sla || 0}%`;
-      const sc = k.setores_criticos && k.setores_criticos.length
-        ? k.setores_criticos.join(', ')
-        : 'Nenhum';
-      document.getElementById('kpiSetoresCriticos').innerText = sc;
+    .filter-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      min-width: 200px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--color-slate-200);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+      display: none;
+      padding: 0.5rem;
+      animation: fadeIn 0.2s ease-out;
+    }
 
-      const vr = k.variacao_resposta_pct || 0;
-      const tw = document.getElementById('kpiTendenciaWrapper');
-      const tvt = document.getElementById('kpiVariacaoTexto');
-      tw.className = `kpi-trend ${vr <= 0 ? 'kpi-trend-down' : 'kpi-trend-up'}`;
-      const icon = tw.querySelector('.material-symbols-outlined');
-      icon.innerText = vr <= 0 ? 'trending_down' : 'trending_up';
-      tvt.innerText = `${vr > 0 ? '+' : ''}${vr}% vs sem. anterior`;
-    } catch(e) { console.error('KPIs error:', e); }
-  }
+    html.dark .filter-dropdown {
+      background: rgba(30, 41, 59, 0.95);
+      border-color: var(--color-slate-700);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
 
-  async function carregarHistoricoChart() {
-    try {
-      const hist = await (await fetch('/api/alertas/historico')).json();
-      const container = document.getElementById('miniChartContainer');
-      container.innerHTML = '';
-      if (!hist.length) {
-        container.innerHTML = '<p style="opacity:0.4;font-size:0.7rem">Sem dados esta semana</p>';
-        return;
+    .filter-dropdown.show {
+      display: block;
+    }
+
+    .filter-option {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-slate-700);
+    }
+
+    html.dark .filter-option {
+      color: var(--color-slate-200);
+    }
+
+    .filter-option:hover {
+      background: var(--color-slate-100);
+    }
+
+    html.dark .filter-option:hover {
+      background: var(--color-slate-800);
+    }
+
+    .filter-option.active {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    .filter-divider {
+      height: 1px;
+      background: var(--color-slate-100);
+      margin: 0.5rem 0;
+    }
+
+    html.dark .filter-divider {
+      background: var(--color-slate-800);
+    }
+
+    .filter-chip.active {
+      border-color: var(--color-primary);
+      background-color: rgba(19, 109, 236, 0.05);
+      color: var(--color-primary);
+    }
+
+    .filter-current {
+      font-weight: 700;
+    }
+
+    .btn-clear-filters {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-clear-filters:hover {
+      background: rgba(239, 68, 68, 0.2);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
       }
-      const maxVal = Math.max(...hist.map(h => h.total_disparados), 1);
-      hist.forEach(h => {
-        const hPct = Math.round((h.total_resolvidos / maxVal) * 100);
-        const tPct = Math.round((h.total_disparados / maxVal) * 100);
-        container.insertAdjacentHTML('beforeend',
-          `<div class="bar-mini" style="height:${tPct}%" title="${h.dia}: ${h.total_disparados} alertas"></div>` +
-          `<div class="bar-mini bar-mini-soft" style="height:${hPct}%" title="${h.dia}: ${h.total_resolvidos} resolvidos"></div>`
-        );
-      });
-    } catch(e) { console.error('Histórico error:', e); }
-  }
 
-  async function carregarAlertas() {
-    try {
-      const alertas = await (await fetch('/api/alertas')).json();
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeInModal 0.2s ease-out;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-container {
+      background: #ffffff;
+      width: 100%;
+      max-width: 450px;
+      border-radius: var(--radius-xl);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    html.dark .modal-container {
+      background: var(--color-background-dark);
+      border: 1px solid var(--color-slate-800);
+    }
+
+    .modal-header {
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--color-slate-100);
+    }
+
+    html.dark .modal-header {
+      border-bottom-color: var(--color-slate-800);
+    }
+
+    .modal-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .modal-icon {
+      font-size: 1.5rem;
+      color: var(--color-primary);
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--color-slate-400);
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: var(--color-slate-600);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--color-slate-500);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-slate-200);
+      background: #f8fafc;
+      font-family: inherit;
+      font-size: 0.875rem;
+      transition: border-color 0.2s;
+    }
+
+    html.dark .form-select,
+    html.dark .form-textarea {
+      background: var(--color-neutral-800);
+      border-color: var(--color-slate-700);
+      color: white;
+    }
+
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+
+    .priority-options {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .priority-radio {
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .priority-radio input {
+      display: none;
+    }
+
+    .priority-tag {
+      display: block;
+      text-align: center;
+      padding: 0.5rem;
+      border-radius: var(--radius-md);
+      font-size: 0.75rem;
+      font-weight: 700;
+      opacity: 0.4;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+    }
+
+    .priority-radio input:checked+.priority-tag {
+      opacity: 1;
+      transform: scale(1.05);
+      border-color: currentColor;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .btn-primary {
+      flex: 1;
+      background: var(--color-primary);
+      color: white;
+      border: none;
+      padding: 0.75rem;
+      border-radius: var(--radius-lg);
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(19, 109, 236, 0.3);
+      transition: transform 0.2s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-ghost {
+      padding: 0.75rem 1.25rem;
+      background: transparent;
+      border: 1px solid var(--color-slate-200);
+      border-radius: var(--radius-lg);
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--color-slate-500);
+    }
+
+    html.dark .btn-ghost {
+      border-color: var(--color-slate-700);
+    }
+
+    @keyframes fadeInModal {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const TAG_CLASSES = {
+      CO2: 'tag-amber',
+      VOC: 'tag-purple',
+      TEMPERATURA: 'tag-blue',
+      UMIDADE: 'tag-blue',
+      RUIDO: 'tag-amber',
+      PESSOAS: 'tag-purple',
+    };
+    const STATUS_PILLS = {
+      ABERTO: 'status-pill-danger',
+      EM_ATENDIMENTO: 'status-pill-info',
+      RESOLVIDO: 'status-pill-success',
+    };
+
+    let allAlertas = [];
+    const filters = {
+      setor: 'all',
+      tipo: 'all',
+      gravidade: 'all',
+      status: 'all',
+      search: ''
+    };
+
+    async function carregarKPIs() {
+      try {
+        const k = await (await fetch('/api/alertas/kpis')).json();
+        document.getElementById('kpiTempoResposta').innerText =
+          `${k.tempo_medio_resposta_min || 0} min`;
+        document.getElementById('kpiSLA').innerText =
+          `${k.pct_resposta_no_sla || 0}%`;
+        const sc = k.setores_criticos && k.setores_criticos.length
+          ? k.setores_criticos.join(', ')
+          : 'Nenhum';
+        document.getElementById('kpiSetoresCriticos').innerText = sc;
+
+        const vr = k.variacao_resposta_pct || 0;
+        const tw = document.getElementById('kpiTendenciaWrapper');
+        const tvt = document.getElementById('kpiVariacaoTexto');
+        tw.className = `kpi-trend ${vr <= 0 ? 'kpi-trend-down' : 'kpi-trend-up'}`;
+        const icon = tw.querySelector('.material-symbols-outlined');
+        icon.innerText = vr <= 0 ? 'trending_down' : 'trending_up';
+        tvt.innerText = `${vr > 0 ? '+' : ''}${vr}% vs sem. anterior`;
+      } catch (e) { console.error('KPIs error:', e); }
+    }
+
+    async function carregarHistoricoChart() {
+      try {
+        const hist = await (await fetch('/api/alertas/historico')).json();
+        const container = document.getElementById('miniChartContainer');
+        container.innerHTML = '';
+        if (!hist.length) {
+          container.innerHTML = '<p style="opacity:0.4;font-size:0.7rem">Sem dados esta semana</p>';
+          return;
+        }
+        const maxVal = Math.max(...hist.map(h => h.total_disparados), 1);
+        hist.forEach(h => {
+          const hPct = Math.round((h.total_resolvidos / maxVal) * 100);
+          const tPct = Math.round((h.total_disparados / maxVal) * 100);
+          container.insertAdjacentHTML('beforeend',
+            `<div class="bar-mini" style="height:${tPct}%" title="${h.dia}: ${h.total_disparados} alertas"></div>` +
+            `<div class="bar-mini bar-mini-soft" style="height:${hPct}%" title="${h.dia}: ${h.total_resolvidos} resolvidos"></div>`
+          );
+        });
+      } catch (e) { console.error('Histórico error:', e); }
+    }
+
+    async function carregarSetores() {
+      try {
+        const setores = await (await fetch('/api/setores')).json();
+        const container = document.getElementById('setoresOptions');
+        if (!container) return;
+        container.innerHTML = setores.map(s => `
+        <div class="filter-option" data-value="${s.id_setor}">${s.nome_setor}</div>
+      `).join('');
+
+        // Re-bind click events for new options
+        container.querySelectorAll('.filter-option').forEach(opt => {
+          opt.addEventListener('click', () => handleFilterClick('setor', opt));
+        });
+      } catch (e) { console.error('Erro ao carregar setores:', e); }
+    }
+
+    function handleFilterClick(filterKey, element) {
+      const value = element.getAttribute('data-value');
+      const wrapper = element.closest('.filter-wrapper');
+      const currentText = wrapper.querySelector('.filter-current');
+      const chip = wrapper.querySelector('.filter-chip');
+
+      // Update active state in dropdown
+      wrapper.querySelectorAll('.filter-option').forEach(opt => opt.classList.remove('active'));
+      element.classList.add('active');
+
+      // Update button text and style
+      filters[filterKey] = value;
+      currentText.innerText = element.innerText;
+
+      if (value === 'all') {
+        chip.classList.remove('active');
+      } else {
+        chip.classList.add('active');
+      }
+
+      // Close dropdown
+      element.closest('.filter-dropdown').classList.remove('show');
+
+      applyFilters();
+    }
+
+    function applyFilters() {
+      let filtered = [...allAlertas];
+
+      // 1. Filter by Sector
+      if (filters.setor !== 'all') {
+        filtered = filtered.filter(a => a.id_setor == filters.setor);
+      }
+
+      // 2. Filter by Type
+      if (filters.tipo !== 'all') {
+        filtered = filtered.filter(a => a.parametro === filters.tipo);
+      }
+
+      // 3. Filter by Severity
+      if (filters.gravidade !== 'all') {
+        filtered = filtered.filter(a => a.severidade === filters.gravidade);
+      }
+
+      // 4. Filter by Status
+      if (filters.status !== 'all') {
+        filtered = filtered.filter(a => a.status === filters.status);
+      }
+
+      // 5. Search
+      if (filters.search) {
+        const q = filters.search.toLowerCase();
+        filtered = filtered.filter(a =>
+          a.nome_setor.toLowerCase().includes(q) ||
+          a.parametro.toLowerCase().includes(q) ||
+          (a.descricao && a.descricao.toLowerCase().includes(q))
+        );
+      }
+
+      // Toggle Clear Filters button
+      const hasActiveFilters = filters.setor !== 'all' || filters.tipo !== 'all' ||
+        filters.gravidade !== 'all' || filters.status !== 'all' ||
+        filters.search !== '';
+      document.getElementById('btnClearFilters').style.display = hasActiveFilters ? 'inline-flex' : 'none';
+
+      renderAlertas(filtered);
+    }
+
+    function renderAlertas(alertas) {
       const tbody = document.getElementById('alertasTbody');
       tbody.innerHTML = '';
 
       if (!alertas.length) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;opacity:0.5;padding:1rem">Nenhum alerta registrado.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;opacity:0.5;padding:2rem">Nenhum alerta encontrado com os filtros selecionados.</td></tr>';
         document.getElementById('alertasFooterText').innerText = 'Nenhum alerta encontrado';
         return;
       }
@@ -439,12 +969,11 @@
       alertas.forEach(a => {
         const tagClass = TAG_CLASSES[a.parametro] || 'tag-amber';
         const sevClass = a.severidade === 'CRITICO' ? 'severity-critical' : 'severity-warning';
-        const sevIcon  = a.severidade === 'CRITICO' ? 'error' : 'warning';
+        const sevIcon = a.severidade === 'CRITICO' ? 'error' : 'warning';
         const sevLabel = a.severidade === 'CRITICO' ? 'Crítico' : 'Alerta';
         const pillClass = STATUS_PILLS[a.status] || 'status-pill-info';
         const statusLabel = a.status.replace('_', ' ');
 
-        // SLA: 15 min = 900 seg
         let slaHtml;
         if (a.status === 'RESOLVIDO') {
           slaHtml = `<p class="sla-time sla-time-neutral">${a.minutos_ate_atendimento || '--'} min</p>`;
@@ -456,38 +985,260 @@
         }
 
         tbody.insertAdjacentHTML('beforeend', `
-          <tr class="table-row ${a.severidade === 'CRITICO' ? 'table-row-critical' : ''}">
-            <td><p class="table-cell-main">${a.data_hora}</p></td>
-            <td><p class="table-cell-main">${a.nome_setor}</p></td>
-            <td>
-              <div class="table-tag-with-text">
-                <span class="tag ${tagClass}">${a.parametro}</span>
-                <p class="tag-caption">${a.descricao ? a.descricao.substring(0, 25) + '...' : ''}</p>
-              </div>
-            </td>
-            <td>
-              <div class="severity ${sevClass}">
-                <span class="material-symbols-outlined severity-icon">${sevIcon}</span>
-                <span class="severity-label">${sevLabel}</span>
-              </div>
-            </td>
-            <td>${slaHtml}</td>
-            <td><span class="status-pill ${pillClass}">${statusLabel}</span></td>
-            <td class="table-cell-actions">
-              <button class="icon-button-ghost"><span class="material-symbols-outlined">visibility</span></button>
-            </td>
-          </tr>
-        `);
+        <tr class="table-row ${a.severidade === 'CRITICO' ? 'table-row-critical' : ''}">
+          <td><p class="table-cell-main">${a.data_hora}</p></td>
+          <td><p class="table-cell-main">${a.nome_setor}</p></td>
+          <td>
+            <div class="table-tag-with-text">
+              <span class="tag ${tagClass}">${a.parametro}</span>
+              <p class="tag-caption">${a.descricao ? a.descricao.substring(0, 25) + '...' : ''}</p>
+            </div>
+          </td>
+          <td>
+            <div class="severity ${sevClass}">
+              <span class="material-symbols-outlined severity-icon">${sevIcon}</span>
+              <span class="severity-label">${sevLabel}</span>
+            </div>
+          </td>
+          <td>${slaHtml}</td>
+          <td><span class="status-pill ${pillClass}">${statusLabel}</span></td>
+          <td class="table-cell-actions">
+            <button class="icon-button-ghost"><span class="material-symbols-outlined">visibility</span></button>
+          </td>
+        </tr>
+      `);
       });
-    } catch(e) { console.error('Alertas error:', e); }
-  }
+    }
 
-  function reloadCentral() {
-    carregarKPIs();
-    carregarHistoricoChart();
-    carregarAlertas();
-  }
+    async function carregarAlertas() {
+      try {
+        const data = await (await fetch('/api/alertas')).json();
+        allAlertas = data;
+        applyFilters();
+      } catch (e) { console.error('Alertas error:', e); }
+    }
 
-  reloadCentral();
-  setInterval(reloadCentral, 15000);
-</script>
+    // Setup Event Listeners
+    function initFilters() {
+      // Dropdown toggles
+      document.querySelectorAll('.filter-chip').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          if (btn.id === 'btnClearFilters') return;
+
+          e.stopPropagation();
+          const dropdown = btn.nextElementSibling;
+          const isShown = dropdown.classList.contains('show');
+
+          // Close all others
+          document.querySelectorAll('.filter-dropdown').forEach(d => d.classList.remove('show'));
+
+          if (!isShown) dropdown.classList.add('show');
+        });
+      });
+
+      // Close dropdowns on click outside
+      document.addEventListener('click', () => {
+        document.querySelectorAll('.filter-dropdown').forEach(d => d.classList.remove('show'));
+      });
+
+      // Filter options click
+      document.querySelectorAll('.filter-option').forEach(opt => {
+        const filterKey = opt.closest('.filter-dropdown').id.replace('dropdown', '').toLowerCase();
+        opt.addEventListener('click', () => handleFilterClick(filterKey, opt));
+      });
+
+      // Search input
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          filters.search = e.target.value;
+          applyFilters();
+        });
+      }
+
+      // Clear filters
+      document.getElementById('btnClearFilters').addEventListener('click', () => {
+        filters.setor = 'all';
+        filters.tipo = 'all';
+        filters.gravidade = 'all';
+        filters.status = 'all';
+        filters.search = '';
+
+        if (searchInput) searchInput.value = '';
+
+        document.querySelectorAll('.filter-wrapper').forEach(wrapper => {
+          wrapper.querySelector('.filter-chip').classList.remove('active');
+          const options = wrapper.querySelectorAll('.filter-option');
+          options.forEach(o => o.classList.remove('active'));
+          options[0].classList.add('active');
+          wrapper.querySelector('.filter-current').innerText = options[0].innerText;
+        });
+
+        applyFilters();
+      });
+    }
+
+    function reloadCentral() {
+      carregarKPIs();
+      carregarHistoricoChart();
+      carregarAlertas();
+    }
+
+    // Quick Action Modals
+    function openQuickActionModal(action) {
+      const modal = document.getElementById('quickActionModal');
+      const title = document.getElementById('modalTitle');
+      const icon = document.getElementById('modalIcon');
+      const typeInput = document.getElementById('actionType');
+
+      // Reset form
+      document.getElementById('quickActionForm').reset();
+      typeInput.value = action;
+
+      const configs = {
+        limpeza: {
+          title: 'Ticket de Limpeza',
+          icon: 'cleaning_services'
+        },
+        manutencao: {
+          title: 'Ticket de Manutenção',
+          icon: 'build'
+        },
+        seguranca: {
+          title: 'Chamada de Segurança',
+          icon: 'security'
+        }
+      };
+
+      const config = configs[action];
+      title.innerText = config.title;
+      icon.innerText = config.icon;
+
+      // Populate sectors in modal if not already done
+      const modalSetor = document.getElementById('modalSetor');
+      if (modalSetor.options.length <= 1) {
+        fetch('/api/setores')
+          .then(res => res.json())
+          .then(setores => {
+            setores.forEach(s => {
+              const opt = document.createElement('option');
+              opt.value = s.id_setor;
+              opt.text = s.nome_setor;
+              modalSetor.add(opt);
+            });
+          });
+      }
+
+      modal.classList.add('show');
+    }
+
+    function closeQuickActionModal() {
+      document.getElementById('quickActionModal').classList.remove('show');
+    }
+
+    async function handleQuickActionSubmit(event) {
+      event.preventDefault();
+      const type = document.getElementById('actionType').value;
+      const sector = document.getElementById('modalSetor').value;
+      const priority = document.querySelector('input[name="priority"]:checked').value;
+      const obs = document.getElementById('modalObs').value;
+
+      // Aqui você faria o POST para a sua API real
+      console.log('Enviando Ticket:', { type, sector, priority, obs });
+
+      // Simulação de feedback premium
+      const btn = event.target.querySelector('.btn-primary');
+      const originalText = btn.innerText;
+      btn.disabled = true;
+      btn.innerText = 'Enviando...';
+
+      setTimeout(() => {
+        closeQuickActionModal();
+        btn.disabled = false;
+        btn.innerText = originalText;
+
+        // Feedback via SweetAlert se disponível, ou alert simples
+        if (window.Swal) {
+          Swal.fire({
+            title: 'Solicitação Enviada!',
+            text: 'A equipe responsável já foi notificada.',
+            icon: 'success',
+            confirmButtonColor: '#136dec'
+          });
+        } else {
+          alert('Solicitação enviada com sucesso!');
+        }
+      }, 1500);
+    }
+
+    // Novo Ticket Completo
+    function openNovoTicketModal() {
+      const modal = document.getElementById('modalNovoTicket');
+      document.getElementById('formNovoTicket').reset();
+
+      // Populate sectors
+      const ticketSetor = document.getElementById('ticketSetor');
+      if (ticketSetor.options.length <= 1) {
+        fetch('/api/setores')
+          .then(res => res.json())
+          .then(setores => {
+            setores.forEach(s => {
+              const opt = document.createElement('option');
+              opt.value = s.id_setor;
+              opt.text = s.nome_setor;
+              ticketSetor.add(opt);
+            });
+          });
+      }
+
+      modal.classList.add('show');
+    }
+
+    function closeNovoTicketModal() {
+      document.getElementById('modalNovoTicket').classList.remove('show');
+    }
+
+    async function handleNovoTicketSubmit(event) {
+      event.preventDefault();
+
+      const data = {
+        id_setor: document.getElementById('ticketSetor').value,
+        parametro: document.getElementById('ticketTipo').value,
+        severidade: document.getElementById('ticketGravidade').value,
+        status: document.getElementById('ticketStatus').value,
+        descricao: document.getElementById('ticketDesc').value,
+        data_hora: new Date().toLocaleString('pt-BR') // Automático
+      };
+
+      console.log('Criando novo ticket:', data);
+
+      const btn = event.target.querySelector('.btn-primary');
+      btn.disabled = true;
+      btn.innerText = 'Registrando...';
+
+      setTimeout(() => {
+        closeNovoTicketModal();
+        btn.disabled = false;
+        btn.innerText = 'Registrar Ticket';
+
+        if (window.Swal) {
+          Swal.fire({
+            title: 'Ticket Registrado!',
+            text: 'O novo ticket foi adicionado à central.',
+            icon: 'success',
+            confirmButtonColor: '#136dec'
+          });
+        } else {
+          alert('Ticket registrado com sucesso!');
+        }
+
+        // Simulação: recarregar alertas para mostrar o "novo" (embora sem backend persistente para este novo ticket, ele não aparecerá de verdade sem um POST real)
+        reloadCentral();
+      }, 1500);
+    }
+
+    initFilters();
+    carregarSetores();
+    reloadCentral();
+    setInterval(reloadCentral, 15000);
+  </script>

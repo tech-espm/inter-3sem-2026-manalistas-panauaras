@@ -228,7 +228,7 @@
               </span>
               em 10 min para controle de CO2.
             </p>
-            <button class="action-button">
+            <button class="action-button" onclick="executarVentilacao(this)">
               Executar Agora
             </button>
           </article>
@@ -283,9 +283,179 @@
       </section>
     </main>
   </div>
+  <!-- Backdrop e Modal de Sucesso -->
+  <div id="modalBackdrop" class="modal-backdrop"></div>
+  <div id="successModal" class="success-modal">
+    <div id="confettiContainer" class="confetti-container"></div>
+    <div class="modal-content">
+      <div class="modal-icon-circle">
+        <span class="material-symbols-outlined">check_circle</span>
+      </div>
+      <h3 class="modal-title-big">Ação Concluída!</h3>
+      <p class="modal-description">A ventilação forçada foi ativada com sucesso para este setor.</p>
+      <button class="modal-btn-ok" onclick="fecharModalSucesso()">Entendido</button>
+    </div>
+  </div>
 </div>
 
 <%- contentFor("espaco-rodape") %>
+  <style>
+    /* Estilos do Modal Centralizado */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-backdrop.show {
+      display: block;
+      opacity: 1;
+    }
+
+    .success-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -40%);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 2.5rem;
+      border-radius: 2rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      z-index: 2001;
+      display: none;
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    html.dark .success-modal {
+      background: rgba(30, 41, 59, 0.95);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .success-modal.show {
+      display: block;
+      opacity: 1;
+      transform: translate(-50%, -50%);
+    }
+
+    .modal-icon-circle {
+      width: 80px;
+      height: 80px;
+      background: #10b981;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .modal-icon-circle span {
+      font-size: 3rem;
+    }
+
+    .modal-title-big {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: var(--color-slate-900);
+    }
+
+    html.dark .modal-title-big {
+      color: white;
+    }
+
+    .modal-description {
+      color: var(--color-slate-500);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 2rem;
+    }
+
+    .modal-btn-ok {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 0.8rem 2.5rem;
+      border-radius: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .modal-btn-ok:hover {
+      transform: scale(1.05);
+    }
+
+    /* Confetes */
+    .confetti-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+      z-index: 2002;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    /* Efeito de Clique no Botão */
+    .action-button {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-button:active {
+      transform: scale(0.95);
+    }
+
+    .action-button.loading {
+      pointer-events: none;
+      opacity: 0.8;
+      background-color: var(--color-slate-400);
+    }
+
+    /* Animação de Pulse no ícone do Toast */
+    .toast-icon span {
+      animation: pulse-icon 2s infinite;
+    }
+
+    @keyframes pulse-icon {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.2);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     const chartSettingsMini = {
@@ -422,6 +592,74 @@
       carregarGraficoFluxo();
       carregarCorrelacaoAmbiental();
       carregarEventosRecentes();
+    }
+
+    // Função para executar ventilação com feedback
+    async function executarVentilacao(btn) {
+      if (btn.classList.contains('loading')) return;
+
+      const originalText = btn.innerText;
+      btn.classList.add('loading');
+      btn.innerText = 'Acionando...';
+
+      setTimeout(() => {
+        btn.innerText = 'Ativado ✓';
+        btn.style.backgroundColor = '#10b981';
+
+        // Mostra o Modal e Backdrop
+        document.getElementById('modalBackdrop').classList.add('show');
+        document.getElementById('successModal').classList.add('show');
+
+        // Lança os confetes
+        lancarConfetes();
+
+        // Reseta o botão após o sucesso
+        setTimeout(() => {
+          btn.classList.remove('loading');
+          btn.innerText = originalText;
+          btn.style.backgroundColor = '';
+        }, 3000);
+      }, 800);
+    }
+
+    function fecharModalSucesso() {
+      document.getElementById('modalBackdrop').classList.remove('show');
+      document.getElementById('successModal').classList.remove('show');
+    }
+
+    function lancarConfetes() {
+      const container = document.getElementById('confettiContainer');
+      const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
+
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+
+        // Estilos iniciais aleatórios
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.backgroundColor = color;
+        confetti.style.left = '0px';
+        confetti.style.top = '0px';
+
+        container.appendChild(confetti);
+
+        // Ângulo e velocidade aleatórios
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = 50 + Math.random() * 150;
+        const tx = Math.cos(angle) * velocity;
+        const ty = Math.sin(angle) * velocity;
+        const rot = Math.random() * 360;
+
+        // Animação manual usando Web Animations API (nativa do JS)
+        confetti.animate([
+          { transform: 'translate(0, 0) rotate(0)', opacity: 1 },
+          { transform: `translate(${tx}px, ${ty}px) rotate(${rot}deg)`, opacity: 0 }
+        ], {
+          duration: 1000 + Math.random() * 1000,
+          easing: 'cubic-bezier(0, .9, .57, 1)',
+          fill: 'forwards'
+        }).onfinish = () => confetti.remove();
+      }
     }
 
     reloadAllData();

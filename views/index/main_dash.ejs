@@ -8,8 +8,8 @@
         <svg>
           <circle cx="64" cy="64" r="56" fill="transparent" stroke="currentColor" stroke-width="8" class="gauge-track">
           </circle>
-          <circle id="gaugeRing" class="gauge-ring" cx="64" cy="64" r="56" fill="transparent" stroke="currentColor" stroke-width="8"
-            stroke-dasharray="351.85" stroke-dashoffset="351.85" stroke-linecap="round"></circle>
+          <circle id="gaugeRing" class="gauge-ring" cx="64" cy="64" r="56" fill="transparent" stroke="currentColor"
+            stroke-width="8" stroke-dasharray="351.85" stroke-dashoffset="351.85" stroke-linecap="round"></circle>
         </svg>
         <div class="gauge-center">
           <span id="gaugeValor" class="gauge-value">--</span>
@@ -27,20 +27,24 @@
       <h3 class="card-title">Filtros de Setor</h3>
       <div class="filter-list">
         <label class="filter-item">
-          <input type="checkbox" checked class="checkbox-base" />
+          <input type="checkbox" checked class="checkbox-base filter-checkbox" value="UTI" />
           <span>UTIs</span>
         </label>
         <label class="filter-item">
-          <input type="checkbox" checked class="checkbox-base" />
+          <input type="checkbox" checked class="checkbox-base filter-checkbox" value="Enfermaria" />
           <span>Enfermarias</span>
         </label>
         <label class="filter-item">
-          <input type="checkbox" checked class="checkbox-base" />
-          <span>Sanitários</span>
+          <input type="checkbox" checked class="checkbox-base filter-checkbox" value="Recepção" />
+          <span>Salas de Espera</span>
         </label>
         <label class="filter-item">
-          <input type="checkbox" checked class="checkbox-base" />
-          <span>Salas de Espera</span>
+          <input type="checkbox" checked class="checkbox-base filter-checkbox" value="Cirurgia" />
+          <span>Bloco Cirúrgico</span>
+        </label>
+        <label class="filter-item">
+          <input type="checkbox" checked class="checkbox-base filter-checkbox" value="Farmácia" />
+          <span>Farmácia</span>
         </label>
       </div>
 
@@ -156,73 +160,90 @@
 </div>
 
 <%- contentFor('espaco-rodape') %>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  const STATUS_CLASSES = {
-    NORMAL:  { tile: 'heat-tile-normal',   badge: 'heat-tile-badge-normal',   dot: 'dot-success',  metric: 'metric-success',  pill: 'status-pill-success',  icon: 'check_circle',       label: 'Normal'  },
-    ATENCAO: { tile: 'heat-tile-warning',  badge: 'heat-tile-badge-warning',  dot: 'dot-warning',  metric: 'metric-warning',  pill: 'status-pill-warning',  icon: 'warning',            label: 'Atenção' },
-    CRITICO: { tile: 'heat-tile-critical', badge: 'heat-tile-badge-critical', dot: 'dot-danger',   metric: 'metric-danger',   pill: 'status-pill-danger',   icon: 'dangerous',          label: 'Crítico' },
-  };
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const STATUS_CLASSES = {
+      NORMAL: { tile: 'heat-tile-normal', badge: 'heat-tile-badge-normal', dot: 'dot-success', metric: 'metric-success', pill: 'status-pill-success', icon: 'check_circle', label: 'Normal' },
+      ATENCAO: { tile: 'heat-tile-warning', badge: 'heat-tile-badge-warning', dot: 'dot-warning', metric: 'metric-warning', pill: 'status-pill-warning', icon: 'warning', label: 'Atenção' },
+      CRITICO: { tile: 'heat-tile-critical', badge: 'heat-tile-badge-critical', dot: 'dot-danger', metric: 'metric-danger', pill: 'status-pill-danger', icon: 'dangerous', label: 'Crítico' },
+    };
 
-  const sparksCharts = {};
+    const sparksCharts = {};
+    let setoresCache = [];
 
-  function renderSparkline(canvasId, historico) {
-    if (sparksCharts[canvasId]) sparksCharts[canvasId].destroy();
-    const ctx = document.getElementById(canvasId);
-    if (!ctx) return;
-    sparksCharts[canvasId] = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: historico.map((_, i) => i),
-        datasets: [{ data: historico, backgroundColor: 'rgba(99,102,241,0.5)', borderRadius: 3 }]
-      },
-      options: {
-        responsive: false, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { enabled: false } },
-        scales: { x: { display: false }, y: { display: false } },
-        layout: { padding: 0 }
-      }
-    });
-  }
+    function renderSparkline(canvasId, historico) {
+      if (sparksCharts[canvasId]) sparksCharts[canvasId].destroy();
+      const ctx = document.getElementById(canvasId);
+      if (!ctx) return;
+      sparksCharts[canvasId] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: historico.map((_, i) => i),
+          datasets: [{ data: historico, backgroundColor: 'rgba(99,102,241,0.5)', borderRadius: 3 }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { enabled: false } },
+          scales: { x: { display: false }, y: { display: false } },
+          layout: { padding: 0 }
+        }
+      });
+    }
 
-  async function carregarResumo() {
-    try {
-      const d = await (await fetch('/api/dashboard/resumo')).json();
+    async function carregarResumo() {
+      try {
+        const d = await (await fetch('/api/dashboard/resumo')).json();
 
-      // Gauge
-      const score = d.score_ambiental || 0;
-      document.getElementById('gaugeValor').innerText = score;
-      const circum = 351.85;
-      const offset = circum - (score / 100) * circum;
-      document.getElementById('gaugeRing').setAttribute('stroke-dashoffset', offset.toFixed(2));
+        // Gauge
+        const score = d.score_ambiental || 0;
+        document.getElementById('gaugeValor').innerText = score;
+        const circum = 351.85;
+        const offset = circum - (score / 100) * circum;
+        document.getElementById('gaugeRing').setAttribute('stroke-dashoffset', offset.toFixed(2));
 
-      // Status Pill
-      const sc = STATUS_CLASSES[d.status_geral] || STATUS_CLASSES.NORMAL;
-      const pill = document.getElementById('statusGeral');
-      pill.className = `status-pill ${sc.pill}`;
-      pill.querySelector('.material-symbols-outlined').innerText = sc.icon;
-      document.getElementById('statusGeralText').innerText = d.status_geral === 'NORMAL' ? 'ESTÁVEL' : d.status_geral;
+        // Status Pill
+        const sc = STATUS_CLASSES[d.status_geral] || STATUS_CLASSES.NORMAL;
+        const pill = document.getElementById('statusGeral');
+        pill.className = `status-pill ${sc.pill}`;
+        pill.querySelector('.material-symbols-outlined').innerText = sc.icon;
+        document.getElementById('statusGeralText').innerText = d.status_geral === 'NORMAL' ? 'ESTÁVEL' : d.status_geral;
 
-      // Highlight cards
-      document.getElementById('picoCO2Setor').innerText = d.pico_co2_setor;
-      document.getElementById('picoCO2Valor').innerText = `${d.pico_co2_valor} ppm`;
-      document.getElementById('picoVOCSetor').innerText = d.pico_voc_setor;
-      document.getElementById('picoVOCValor').innerText = `${d.pico_voc_valor} ppb`;
-      document.getElementById('eventosOdorHoje').innerText = `${d.eventos_odor_hoje} ocorrências`;
+        // Highlight cards
+        document.getElementById('picoCO2Setor').innerText = d.pico_co2_setor;
+        document.getElementById('picoCO2Valor').innerText = `${d.pico_co2_valor} ppm`;
+        document.getElementById('picoVOCSetor').innerText = d.pico_voc_setor;
+        document.getElementById('picoVOCValor').innerText = `${d.pico_voc_valor} ppb`;
+        document.getElementById('eventosOdorHoje').innerText = `${d.eventos_odor_hoje} ocorrências`;
 
-      // Status Bar
-      document.getElementById('ultimaAtualizacao').innerText = `Última atualização: ${d.hora_medicao}`;
-      document.getElementById('sensoresAtivos').innerText = `${d.sensores_ativos} Sensores Ativos`;
-    } catch(e) { console.error('Erro ao carregar resumo:', e); }
-  }
+        // Status Bar
+        document.getElementById('ultimaAtualizacao').innerText = `Última atualização: ${d.hora_medicao}`;
+        document.getElementById('sensoresAtivos').innerText = `${d.sensores_ativos} Sensores Ativos`;
+      } catch (e) { console.error('Erro ao carregar resumo:', e); }
+    }
 
-  async function carregarHeatmap() {
-    try {
-      const setores = await (await fetch('/api/dashboard/heatmap')).json();
+    async function carregarHeatmap() {
+      try {
+        setoresCache = await (await fetch('/api/dashboard/heatmap')).json();
+        renderizarHeatmap();
+      } catch (e) { console.error('Erro ao carregar heatmap:', e); }
+    }
+
+    function renderizarHeatmap() {
       const grid = document.getElementById('heatmapGrid');
       grid.innerHTML = '';
 
-      setores.forEach((s, idx) => {
+      // Pega tipos selecionados
+      const selecionados = Array.from(document.querySelectorAll('.filter-checkbox:checked'))
+        .map(cb => cb.value);
+
+      const filtrados = setoresCache.filter(s => selecionados.includes(s.tipo_setor));
+
+      if (filtrados.length === 0) {
+        grid.innerHTML = '<p style="opacity:0.5;padding:1rem">Nenhum setor selecionado ou encontrado.</p>';
+        return;
+      }
+
+      filtrados.forEach((s, idx) => {
         const sc = STATUS_CLASSES[s.status] || STATUS_CLASSES.NORMAL;
         const canvasId = `spark_${idx}`;
         const tooltipText = s.alertas_24h > 0
@@ -241,8 +262,8 @@
                 <div class="status-tooltip">${tooltipText}</div>
               </div>
             </div>
-            <div class="sparkline" style="height:36px;position:relative">
-              <canvas id="${canvasId}" width="120" height="36"></canvas>
+            <div class="sparkline" style="position:relative">
+              <canvas id="${canvasId}" height="36"></canvas>
             </div>
             <p class="heat-tile-metric">
               CO2: <span class="${sc.metric}">${s.co2_atual} ppm</span>
@@ -251,17 +272,20 @@
           </article>
         `);
 
-        // Renderiza sparkline depois que o DOM existe
         requestAnimationFrame(() => renderSparkline(canvasId, s.historico || []));
       });
-    } catch(e) { console.error('Erro no heatmap:', e); }
-  }
+    }
 
-  function reloadDash() {
-    carregarResumo();
-    carregarHeatmap();
-  }
+    // Event Listeners para filtros
+    document.querySelectorAll('.filter-checkbox').forEach(cb => {
+      cb.addEventListener('change', renderizarHeatmap);
+    });
 
-  reloadDash();
-  setInterval(reloadDash, 15000);
-</script>
+    function reloadDash() {
+      carregarResumo();
+      carregarHeatmap();
+    }
+
+    reloadDash();
+    setInterval(reloadDash, 15000);
+  </script>
