@@ -20,26 +20,10 @@
           Sistema Online
         </span>
       </div>
-      <button class="icon-button icon-button-ghost-soft">
-        <span class="material-symbols-outlined">
-          notifications
-        </span>
-      </button>
-      <button class="icon-button icon-button-ghost-soft">
-        <span class="material-symbols-outlined">
-          settings
-        </span>
-      </button>
-      <div class="user-avatar user-avatar-small">
-        <span class="material-symbols-outlined user-avatar-icon">
-          person
-        </span>
-      </div>
     </div>
   </header>
 
   <div class="flex-layout">
-
     <!-- Main Content -->
     <main class="central-main central-main-padded">
       <!-- Header Section -->
@@ -60,8 +44,8 @@
             <span class="last-update-label">
               Última Atualiz.
             </span>
-            <span class="last-update-time">
-              14:45:02
+            <span class="last-update-time" id="displayUltimaAtualizacao">
+              --:--:--
             </span>
           </div>
         </div>
@@ -76,11 +60,11 @@
               Pessoas no Setor
             </p>
             <div class="occupancy-count-row">
-              <span class="occupancy-count">
-                18
+              <span class="occupancy-count" id="contagemOcupacao">
+                --
               </span>
-              <span class="occupancy-max">
-                / 25
+              <span class="occupancy-max" id="maximaOcupacao">
+                / --
               </span>
             </div>
           </div>
@@ -89,13 +73,12 @@
               <span class="occupancy-meter-label">
                 Nível de Ocupação
               </span>
-              <span class="occupancy-meter-value">
-                72%
+              <span class="occupancy-meter-value" id="porcentagemOcupacao">
+                --%
               </span>
             </div>
             <div class="occupancy-meter-bar">
-              <div class="occupancy-meter-segment occupancy-meter-green" style="width: 50%"></div>
-              <div class="occupancy-meter-segment occupancy-meter-yellow" style="width: 22%"></div>
+              <div id="barraOcupacao" class="occupancy-meter-segment occupancy-meter-green" style="width: 0%"></div>
             </div>
             <p class="occupancy-warning">
               <span class="material-symbols-outlined occupancy-warning-icon">
@@ -115,6 +98,8 @@
               </span>
               Fluxo de Ocupação (60 min)
             </h3>
+            <!--
+            
             <div class="graph-badges">
               <span class="graph-badge graph-badge-red">
                 <span class="graph-badge-dot graph-badge-dot-red"></span>
@@ -125,30 +110,23 @@
                 Alerta
               </span>
             </div>
+            -->
           </div>
           <div class="flow-chart">
             <!-- bands -->
             <div class="flow-chart-bands">
+              <!--
               <div class="flow-band flow-band-critical"></div>
               <div class="flow-band flow-band-warning"></div>
               <div class="flow-band flow-band-normal"></div>
+              -->
             </div>
             <!-- grid pattern is via CSS class -->
             <div class="flow-chart-inner chart-grid">
-              <svg class="flow-chart-line" preserveAspectRatio="none">
-                <path d="M0 100 Q 50 80, 100 110 T 200 70 T 300 90 T 400 50 T 500 40 T 600 60 T 700 30 T 800 50"
-                  fill="none" stroke="currentColor" stroke-width="3" vector-effect="non-scaling-stroke"></path>
-                <circle cx="80%" cy="30" r="4" fill="currentColor"></circle>
-              </svg>
+              <canvas id="fluxoOcupacaoChart" style="width: 100%; height: 20vh;"></canvas>
             </div>
           </div>
-          <div class="flow-chart-xlabels">
-            <span>13:45</span>
-            <span>14:00</span>
-            <span>14:15</span>
-            <span>14:30</span>
-            <span>AGORA</span>
-          </div>
+
         </article>
 
         <!-- Permanence Delta Graph -->
@@ -172,34 +150,27 @@
               Média de estadia em lotação:
             </p>
             <p class="permanence-value">
-              1.240 <span class="permanence-unit">segundos</span>
+              <span id="permanenciaTempo">--</span> <span class="permanence-unit">segundos</span>
             </p>
           </div>
         </article>
 
         <!-- Correlation Panel -->
         <article class="card correlation-card">
-          <div class="card-header">
-            <h3 class="card-title-sm mb-4">
-              Correlação Ambiental
-            </h3>
-            </div>
-            <div class="correlation-wrapper">
-              <div class="correlation-sync-line"></div>
-
-    
+          <h3 class="card-title-sm mb-4">
+            Correlação Ambiental
+          </h3>
+          <div class="correlation-wrapper">
+            <div class="correlation-sync-line"></div>
 
             <div class="correlation-row">
               <div class="correlation-label">
                 CO2 (ppm)
               </div>
               <div class="correlation-track">
-                <svg class="correlation-svg" preserveAspectRatio="none">
-                  <path d="M0 20 L50 18 L100 22 L150 15 L200 10 L250 5 L300 8" fill="none" stroke="#10b981"
-                    stroke-width="2" vector-effect="non-scaling-stroke"></path>
-                </svg>
+                <canvas id="chartCO2" style="width: 100%; height: 30px;"></canvas>
               </div>
-              <div class="correlation-value">840</div>
+              <div class="correlation-value" id="valCO2">--</div>
             </div>
 
             <div class="correlation-row">
@@ -207,12 +178,9 @@
                 Humid (%)
               </div>
               <div class="correlation-track">
-                <svg class="correlation-svg" preserveAspectRatio="none">
-                  <path d="M0 10 L50 12 L100 10 L150 11 L200 14 L250 18 L300 20" fill="none" stroke="#3b82f6"
-                    stroke-width="2" vector-effect="non-scaling-stroke"></path>
-                </svg>
+                <canvas id="chartHumid" style="width: 100%; height: 30px;"></canvas>
               </div>
-              <div class="correlation-value">52%</div>
+              <div class="correlation-value" id="valHumid">--</div>
             </div>
 
             <div class="correlation-row">
@@ -220,12 +188,9 @@
                 Temp (°C)
               </div>
               <div class="correlation-track">
-                <svg class="correlation-svg" preserveAspectRatio="none">
-                  <path d="M0 15 L50 15 L100 14 L150 14 L200 16 L250 19 L300 21" fill="none" stroke="#ef4444"
-                    stroke-width="2" vector-effect="non-scaling-stroke"></path>
-                </svg>
+                <canvas id="chartTemp" style="width: 100%; height: 30px;"></canvas>
               </div>
-              <div class="correlation-value">23.5</div>
+              <div class="correlation-value" id="valTemp">--</div>
             </div>
           </div>
         </article>
@@ -248,7 +213,7 @@
               </span>
               em 10 min para controle de CO2.
             </p>
-            <button class="action-button">
+            <button class="action-button" onclick="executarVentilacao(this)">
               Executar Agora
             </button>
           </article>
@@ -293,38 +258,9 @@
                 <th>Status</th>
               </tr>
             </thead>
-            <tbody>
-              <tr class="table-row">
-                <td class="events-time">
-                  14:42:15
-                </td>
-                <td>
-                  Entrada Detectada (2 pessoas)
-                </td>
-                <td>
-                  18/25
-                </td>
-                <td>
-                  <span class="badge badge-warning">
-                    ALERTA
-                  </span>
-                </td>
-              </tr>
-              <tr class="table-row">
-                <td class="events-time">
-                  14:38:10
-                </td>
-                <td>
-                  Saída Detectada (1 pessoa)
-                </td>
-                <td>
-                  16/25
-                </td>
-                <td>
-                  <span class="badge badge-success">
-                    NORMAL
-                  </span>
-                </td>
+            <tbody id="tabelaEventos">
+              <tr>
+                <td colspan="4" class="text-center">Carregando eventos...</td>
               </tr>
             </tbody>
           </table>
@@ -332,4 +268,385 @@
       </section>
     </main>
   </div>
+  <!-- Backdrop e Modal de Sucesso -->
+  <div id="modalBackdrop" class="modal-backdrop"></div>
+  <div id="successModal" class="success-modal">
+    <div id="confettiContainer" class="confetti-container"></div>
+    <div class="modal-content">
+      <div class="modal-icon-circle">
+        <span class="material-symbols-outlined">check_circle</span>
+      </div>
+      <h3 class="modal-title-big">Ação Concluída!</h3>
+      <p class="modal-description">A ventilação forçada foi ativada com sucesso para este setor.</p>
+      <button class="modal-btn-ok" onclick="fecharModalSucesso()">Entendido</button>
+    </div>
+  </div>
 </div>
+
+<%- contentFor("espaco-rodape") %>
+  <style>
+    /* Estilos do Modal Centralizado */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-backdrop.show {
+      display: block;
+      opacity: 1;
+    }
+
+    .success-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -40%);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 2.5rem;
+      border-radius: 2rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      z-index: 2001;
+      display: none;
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    html.dark .success-modal {
+      background: rgba(30, 41, 59, 0.95);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .success-modal.show {
+      display: block;
+      opacity: 1;
+      transform: translate(-50%, -50%);
+    }
+
+    .modal-icon-circle {
+      width: 80px;
+      height: 80px;
+      background: #10b981;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .modal-icon-circle span {
+      font-size: 3rem;
+    }
+
+    .modal-title-big {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: var(--color-slate-900);
+    }
+
+    html.dark .modal-title-big {
+      color: white;
+    }
+
+    .modal-description {
+      color: var(--color-slate-500);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 2rem;
+    }
+
+    .modal-btn-ok {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 0.8rem 2.5rem;
+      border-radius: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .modal-btn-ok:hover {
+      transform: scale(1.05);
+    }
+
+    /* Confetes */
+    .confetti-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+      z-index: 2002;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    /* Efeito de Clique no Botão */
+    .action-button {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-button:active {
+      transform: scale(0.95);
+    }
+
+    .action-button.loading {
+      pointer-events: none;
+      opacity: 0.8;
+      background-color: var(--color-slate-400);
+    }
+
+    /* Animação de Pulse no ícone do Toast */
+    .toast-icon span {
+      animation: pulse-icon 2s infinite;
+    }
+
+    @keyframes pulse-icon {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.2);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const chartSettingsMini = {
+      type: 'line',
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: { x: { display: false }, y: { display: false } },
+        elements: { point: { radius: 0 } },
+        layout: { padding: 0 }
+      }
+    };
+
+    let chartCO2Instance = null;
+    let chartHumidInstance = null;
+    let chartTempInstance = null;
+    let fluxoChartInstance = null;
+
+    function renderMiniChart(canvasId, color, dataValues, chartRef) {
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      if (chartRef) chartRef.destroy();
+      return new Chart(ctx, {
+        ...chartSettingsMini,
+        data: {
+          labels: dataValues.map((_, i) => i),
+          datasets: [{ data: dataValues, borderColor: color, tension: 0.4, fill: false, borderWidth: 2 }]
+        }
+      });
+    }
+
+    async function carregarCorrelacaoAmbiental() {
+      try {
+        const resp = await fetch('/api/graficos/ambiental');
+        const data = await resp.json();
+
+        if (data.length > 0) {
+          const latest = data[data.length - 1]; // O ultimo é o atual
+          document.getElementById('valCO2').innerText = latest.co2;
+          document.getElementById('valHumid').innerText = latest.humid + '%';
+          document.getElementById('valTemp').innerText = latest.temp;
+
+          chartCO2Instance = renderMiniChart('chartCO2', '#10b981', data.map(d => d.co2), chartCO2Instance);
+          chartHumidInstance = renderMiniChart('chartHumid', '#3b82f6', data.map(d => d.humid), chartHumidInstance);
+          chartTempInstance = renderMiniChart('chartTemp', '#ef4444', data.map(d => d.temp), chartTempInstance);
+
+          // Altera o pseudo valor de permanencia apenas como mock interativo com base no dado
+          document.getElementById('permanenciaTempo').innerText = (latest.co2 * 1.5).toFixed(0);
+        }
+      } catch (e) { console.error('Erro ao buscar correlacao:', e); }
+    }
+
+    async function carregarEventosRecentes() {
+      try {
+        const resp = await fetch('/api/sensores/eventos');
+        const eventos = await resp.json();
+
+        const tbody = document.getElementById('tabelaEventos');
+        tbody.innerHTML = '';
+
+        eventos.forEach(ev => {
+          tbody.innerHTML += `<tr class="table-row">
+                <td class="events-time">${ev.hora}</td>
+                <td>${ev.evento}</td>
+                <td>${ev.ocupacao}</td>
+                <td><span class="badge ${ev.badge}">${ev.status}</span></td>
+              </tr>`;
+        });
+      } catch (e) { console.error('Erro ao buscar eventos:', e); }
+    }
+
+    async function carregarOcupacao() {
+      try {
+        const resp = await fetch('/api/sensores/ocupacao');
+        const data = await resp.json();
+
+        document.getElementById('contagemOcupacao').innerText = data.pessoas_atuais;
+        document.getElementById('maximaOcupacao').innerText = '/ ' + data.capacidade_maxima;
+        document.getElementById('porcentagemOcupacao').innerText = data.porcentagem + '%';
+
+        const barra = document.getElementById('barraOcupacao');
+        barra.style.width = data.porcentagem + '%';
+
+        // Troca a cor dependendo da porcentagem
+        if (data.porcentagem > 80) barra.className = 'occupancy-meter-segment occupancy-meter-red';
+        else if (data.porcentagem > 60) barra.className = 'occupancy-meter-segment occupancy-meter-yellow';
+        else barra.className = 'occupancy-meter-segment occupancy-meter-green';
+
+        document.getElementById('displayUltimaAtualizacao').innerText = data.hora_medicao;
+
+      } catch (err) { console.error('Erro ao buscar ocupação:', err); }
+    }
+
+    async function carregarGraficoFluxo() {
+      try {
+        const resp = await fetch('/api/graficos/ocupacao');
+        const data = await resp.json();
+
+        const labels = data.map(d => d.hora);
+        const values = data.map(d => d.pessoas);
+
+        const ctx = document.getElementById('fluxoOcupacaoChart').getContext('2d');
+        if (fluxoChartInstance) fluxoChartInstance.destroy();
+
+        fluxoChartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Pessoas',
+              data: values,
+              borderColor: '#3b82f6',
+              tension: 0.4,
+              fill: false
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { display: true },
+              y: { beginAtZero: true }
+            }
+          }
+        });
+
+      } catch (err) { console.error('Erro ao desenhar grafico fluxo:', err); }
+    }
+
+    // Refresh general
+    function reloadAllData() {
+      carregarOcupacao();
+      carregarGraficoFluxo();
+      carregarCorrelacaoAmbiental();
+      carregarEventosRecentes();
+    }
+
+    // Função para executar ventilação com feedback
+    async function executarVentilacao(btn) {
+      if (btn.classList.contains('loading')) return;
+
+      const originalText = btn.innerText;
+      btn.classList.add('loading');
+      btn.innerText = 'Acionando...';
+
+      setTimeout(() => {
+        btn.innerText = 'Ativado ✓';
+        btn.style.backgroundColor = '#10b981';
+
+        // Mostra o Modal e Backdrop
+        document.getElementById('modalBackdrop').classList.add('show');
+        document.getElementById('successModal').classList.add('show');
+
+        // Lança os confetes
+        lancarConfetes();
+
+        // Reseta o botão após o sucesso
+        setTimeout(() => {
+          btn.classList.remove('loading');
+          btn.innerText = originalText;
+          btn.style.backgroundColor = '';
+        }, 3000);
+      }, 800);
+    }
+
+    function fecharModalSucesso() {
+      document.getElementById('modalBackdrop').classList.remove('show');
+      document.getElementById('successModal').classList.remove('show');
+    }
+
+    function lancarConfetes() {
+      const container = document.getElementById('confettiContainer');
+      const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
+
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+
+        // Estilos iniciais aleatórios
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.backgroundColor = color;
+        confetti.style.left = '0px';
+        confetti.style.top = '0px';
+
+        container.appendChild(confetti);
+
+        // Ângulo e velocidade aleatórios
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = 50 + Math.random() * 150;
+        const tx = Math.cos(angle) * velocity;
+        const ty = Math.sin(angle) * velocity;
+        const rot = Math.random() * 360;
+
+        // Animação manual usando Web Animations API (nativa do JS)
+        confetti.animate([
+          { transform: 'translate(0, 0) rotate(0)', opacity: 1 },
+          { transform: `translate(${tx}px, ${ty}px) rotate(${rot}deg)`, opacity: 0 }
+        ], {
+          duration: 1000 + Math.random() * 1000,
+          easing: 'cubic-bezier(0, .9, .57, 1)',
+          fill: 'forwards'
+        }).onfinish = () => confetti.remove();
+      }
+    }
+
+    reloadAllData();
+    setInterval(reloadAllData, 10000);
+  </script>

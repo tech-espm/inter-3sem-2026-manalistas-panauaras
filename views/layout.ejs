@@ -1,35 +1,69 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="pt-br">
-<head>
-	<%- include("comum/cabecalho") %>
 
-	<%- defineContent("espaco-head") %>
+<head>
+    <%- include("comum/cabecalho") %>
+
+        <%- defineContent("espaco-head") %>
 </head>
+
 <body>
 
-	<div class="limitador container-fluid"> <!-- container-fluid garante que ocupa a largura toda -->
+    <div class="limitador container-fluid">
 
-    <%- include("comum/barra") %>
+        <%- include("comum/barra") %>
 
-    <!-- Trocamos a classe 'conteudo' por 'row' -->
-    <div class="row">
+            <div class="row">
 
-        <!-- O aside agora é uma coluna (ex: ocupa 3 de 12 partes) -->
-        <div class="col-md-3 col-lg-2 bg-light"> 
-            <%- include("comum/aside") %>
-        </div>
+                <div class="col-md-3 col-lg-2 bg-light">
+                    <%- include("comum/aside") %>
+                </div>
 
-        <!-- O corpo ocupa o resto do espaço (ex: 9 ou 10 partes) -->
-        <main class="col-md-9 col-lg-10">
-            <%- body %>
-        </main>
+                <main class="col-md-9 col-lg-10">
+                    <%- body %>
+                </main>
+
+            </div>
+
+            <%- include("comum/rodape") %>
+                <%- defineContent("espaco-rodape") %>
 
     </div>
 
-    <%- include("comum/rodape") %>
-	<%- defineContent("espaco-rodape") %>
+    <div class="modal fade" id="modalPerfil" tabindex="-1" aria-labelledby="modalPerfilLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 1.5rem;">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-0" id="modalPerfilCorpo">
+                    <div class="text-center p-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-</div>
+    <script>
+        async function carregarPerfil() {
+            const corpo = document.getElementById("modalPerfilCorpo");
+            try {
+                const response = await fetch("/profile");
+                if (response.ok) {
+                    const html = await response.text();
+                    corpo.innerHTML = html;
+                } else {
+                    corpo.innerHTML = '<div class="alert alert-danger">Erro ao carregar o perfil.</div>';
+                }
+            } catch (e) {
+                corpo.innerHTML = '<div class="alert alert-danger">Erro de conexão.</div>';
+            }
+        }
+    </script>
 
 </body>
+
 </html>

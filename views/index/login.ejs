@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Sistema Ambiental</title>
+    <link rel="stylesheet" href="/public/css/login.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
+</head>
+
+<body>
+
+    <div class="container" id="container">
+        <div class="form-container sign-up-container">
+            <form id="formSignUp">
+                <h1>Sing-Up</h1>
+                <div class="social-container">
+                    <a href="#" class="social"><span class="material-symbols-outlined">alternate_email</span></a>
+                    <a href="#" class="social"><span class="material-symbols-outlined">account_circle</span></a>
+                </div>
+                <span>ou use seu email para registrar</span>
+                <input type="text" name="nome" placeholder="Nome Completo" required />
+                <input type="email" name="email" placeholder="Email" required />
+                <input type="password" name="senha" placeholder="Senha" required />
+                <button type="submit">Cadastrar</button>
+            </form>
+        </div>
+
+        <div class="form-container sign-in-container">
+            <form id="formSignIn">
+                <h1>Sing-In</h1>
+                <div class="social-container">
+                    <a href="#" class="social"><span class="material-symbols-outlined">alternate_email</span></a>
+                    <a href="#" class="social"><span class="material-symbols-outlined">account_circle</span></a>
+                </div>
+                <span>ou use sua conta</span>
+                <input type="email" name="email" placeholder="Email" required />
+                <input type="password" name="senha" placeholder="Senha" required />
+                <a href="#">Esqueceu sua senha?</a>
+                <button type="submit">Entrar</button>
+            </form>
+        </div>
+
+        <div class="overlay-container">
+            <div class="overlay">
+                <div class="overlay-panel overlay-left">
+                    <h1>Bem-vindo de volta!</h1>
+                    <p>Para manter-se conectado, faça login com suas informações pessoais</p>
+                    <button class="ghost" id="signIn">Entrar</button>
+                </div>
+                <div class="overlay-panel overlay-right">
+                    <h1>Seja bem-vindo!</h1>
+                    <p>Insira seus dados para se cadastrar</p>
+                    <button class="ghost" id="signUp">Cadastrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const signUpButton = document.getElementById('signUp');
+        const signInButton = document.getElementById('signIn');
+        const container = document.getElementById('container');
+
+        signUpButton.addEventListener('click', () => {
+            container.classList.add("right-panel-active");
+        });
+
+        signInButton.addEventListener('click', () => {
+            container.classList.remove("right-panel-active");
+        });
+
+        // Handle Login
+        document.getElementById('formSignIn').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+
+                if (res.ok) {
+                    window.location.href = '/';
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Ops...',
+                        text: result.mensagem,
+                        confirmButtonColor: '#FF416C'
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        // Handle Sign Up
+        document.getElementById('formSignUp').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const res = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+
+                if (res.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Conta criada!',
+                        text: 'Agora, vamos completar o seu perfil.',
+                        confirmButtonColor: '#FF416C'
+                    }).then(() => {
+                        window.location.href = '/';
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro no cadastro',
+                        text: result.mensagem,
+                        confirmButtonColor: '#FF416C'
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+    </script>
+
+</body>
+
+</html>

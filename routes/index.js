@@ -21,4 +21,8 @@ router.get('/sobre', (req, res) => {
     res.render('index/sobre', { pagina: 'sobre' });
 });
 
+router.get('/profile', (req, res) => {
+    res.render('index/profile', { layout: false, pagina: 'profile' });
+});
+
 module.exports = router;
