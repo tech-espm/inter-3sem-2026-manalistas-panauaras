@@ -4100,3 +4100,284 @@ html.dark .events-table-head {
     opacity: 1;
   }
 }
+
+/* ========== Sobre - versao atual ========== */
+.sobre-container {
+            width: min(100%, 1100px);
+            margin: 0 auto;
+            padding: 2.5rem 1.25rem 4rem;
+        }
+
+        .sobre-hero {
+            padding: 1.5rem 0 2rem;
+            background: transparent;
+        }
+
+        .sobre-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius-full);
+            background: #e2f5f3;
+            color: #0f766e;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .sobre-badge .material-symbols-outlined {
+            font-size: 1rem;
+        }
+
+        .sobre-hero h1 {
+            max-width: 820px;
+            margin: 1.25rem 0 1rem;
+            color: var(--color-slate-900);
+            font-size: clamp(2rem, 4vw, 2.625rem);
+            line-height: 1.12;
+            font-weight: 900;
+        }
+
+        .sobre-hero p {
+            max-width: 680px;
+            margin: 0;
+            color: var(--color-slate-500);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .sobre-cards-2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1.25rem;
+            margin-top: 2.5rem;
+        }
+
+        .sobre-card,
+        .sobre-team-card {
+            position: relative;
+            overflow: hidden;
+            background: #ffffff;
+            border: 1px solid var(--color-slate-100);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        }
+
+        .sobre-card {
+            padding: 1.5rem;
+        }
+
+        .sobre-card::before,
+        .sobre-team-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+        }
+
+        .sobre-card-top-green::before {
+            background: #22c55e;
+        }
+
+        .sobre-card-top-purple::before {
+            background: #8b5cf6;
+        }
+
+        .sobre-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+            border-radius: 0.625rem;
+        }
+
+        .sobre-icon .material-symbols-outlined {
+            font-size: 1.4rem;
+        }
+
+        .sobre-icon-blue {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .sobre-icon-yellow {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .sobre-card h3 {
+            margin: 0;
+            color: var(--color-slate-900);
+            font-size: 1.05rem;
+            font-weight: 800;
+        }
+
+        .sobre-card p {
+            margin: 0.75rem 0 0;
+            color: var(--color-slate-500);
+            font-size: 0.95rem;
+            line-height: 1.65;
+        }
+
+        .sobre-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+            margin: 1.875rem 0 0;
+        }
+
+        .sobre-metric {
+            padding: 1.25rem;
+            border-radius: var(--radius-xl);
+            text-align: center;
+        }
+
+        .sobre-metric strong {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-size: 1.5rem;
+            line-height: 1.1;
+            font-weight: 900;
+        }
+
+        .sobre-metric span {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .sobre-metric-green {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .sobre-metric-blue {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .sobre-metric-purple {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        .sobre-team {
+            margin-top: 3.75rem;
+        }
+
+        .sobre-section-label {
+            color: var(--color-slate-400);
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .sobre-team h2 {
+            margin: 0.5rem 0 0;
+            color: var(--color-slate-900);
+            font-size: clamp(1.75rem, 3vw, 2rem);
+            line-height: 1.2;
+            font-weight: 900;
+        }
+
+        .sobre-team-desc {
+            max-width: 650px;
+            margin: 0.75rem 0 0;
+            color: var(--color-slate-500);
+            line-height: 1.7;
+        }
+
+        .sobre-team-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.875rem;
+        }
+
+        .sobre-team-card {
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .sobre-team-card-blue::before {
+            background: #3b82f6;
+        }
+
+        .sobre-team-card-green::before {
+            background: #22c55e;
+        }
+
+        .sobre-team-card-purple::before {
+            background: #8b5cf6;
+        }
+
+        .sobre-team-card-orange::before {
+            background: #f59e0b;
+        }
+
+        .sobre-avatar {
+            width: 3.75rem;
+            height: 3.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+            border-radius: var(--radius-full);
+            background: #e2e8f0;
+            color: var(--color-slate-500);
+        }
+
+        .sobre-avatar .material-symbols-outlined {
+            font-size: 2rem;
+        }
+
+        .sobre-team-card h4 {
+            margin: 0;
+            color: var(--color-slate-900);
+            font-size: 0.95rem;
+            font-weight: 800;
+        }
+
+        .sobre-team-card > span {
+            display: block;
+            margin-top: 0.4rem;
+            color: var(--color-primary);
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .sobre-team-card p {
+            margin: 0.75rem 0 0;
+            color: var(--color-slate-500);
+            font-size: 0.8125rem;
+            line-height: 1.55;
+        }
+
+        @media (max-width: 992px) {
+            .sobre-team-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sobre-cards-2,
+            .sobre-metrics,
+            .sobre-team-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sobre-container {
+                padding-top: 2rem;
+            }
+        }
+
