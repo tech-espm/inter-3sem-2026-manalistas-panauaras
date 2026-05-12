@@ -243,18 +243,41 @@
     });
   });
 
-  async function carregarSetores() {
-    try {
-      const setores = await (await fetch('/api/setores')).json();
-      const sel = document.getElementById('selectAmbiente');
-      setores.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s.id_setor;
-        opt.text = s.nome_setor;
-        sel.appendChild(opt);
-      });
-    } catch(e) { console.error('Setores:', e); }
+async function carregarSetores() {
+  try {
+    // 1. Busca os dados da sua API
+    const resposta = await fetch('/api/setores');
+    const setores = await resposta.json();
+
+    const sel = document.getElementById('selectAmbiente');
+    
+    // 2. Limpa e define a opção padrão (usando 'all' para alinhar com sua lógica de filtro)
+    sel.innerHTML = '<option value="all">Todos os Ambientes</option>';
+
+    // 3. Popula o dropdown com os dados do banco
+    setores.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.id_setor;   // ID vindo do banco
+      opt.text = s.nome_setor;  // Nome vindo do banco
+      sel.appendChild(opt);
+    });
+
+    // 4. Adiciona o evento de escuta para filtrar quando mudar a seleção
+    sel.addEventListener('change', function() {
+      // Atualiza o objeto global de filtros (assumindo que 'filters' já existe)
+      if (typeof filters !== 'undefined') {
+        filters.setor = this.value;
+        applyFilters(); // Chama sua função de filtragem existente
+      }
+    });
+
+  } catch (e) {
+    console.error('Erro ao carregar setores no dropdown:', e);
   }
+}
+
+// Inicializa a função assim que a página carregar
+document.addEventListener('DOMContentLoaded', carregarSetores);
 
   async function carregarResumo() {
     try {
