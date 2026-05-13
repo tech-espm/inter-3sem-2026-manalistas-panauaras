@@ -1,13 +1,17 @@
 const express = require("express");
 const router = express.Router();
+const Alerta = require("../models/Alerta");
+const wrap = require("express-async-error-wrapper");
 
-router.get('/', (req, res) => {
+router.get('/', wrap(async (req, res) => {
     res.render('index/main_dash', { pagina: 'dashboard' });
-});
+}));
 
-router.get('/alertas', (req, res) => {
-    res.render('index/central_alerta', { pagina: 'alertas' });
-});
+router.get('/alertas', wrap(async (req, res) => {
+    const kpis = await Alerta.getKPIs();
+    const alertas = await Alerta.listar();
+    res.render('index/central_alerta', { pagina: 'alertas', kpis, alertas });
+}));
 
 router.get('/ocupacao', (req, res) => {
     res.render('index/ocupacao', { pagina: 'ocupacao' });

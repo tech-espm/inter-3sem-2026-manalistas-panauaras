@@ -244,11 +244,15 @@ router.get("/dashboard/resumo", wrap(async (req, res) => {
         ORDER BY valor DESC LIMIT 1
     `, [anchor]);
 
-    // Eventos de odor na janela atual (VOC acima de atenção)
-    const [eventosOdor] = await db.query(`
-        SELECT COUNT(*) AS total FROM alertas
-        WHERE parametro = 'VOC' AND severidade != 'NORMAL'
-        AND disparado_em >= DATE_SUB(?, INTERVAL 1 DAY)
+    // Pico de Lotação na janela atual (sensor PCA)
+    const [picoLotacao] = await db.query(`
+        SELECT st.nome_setor, MAX(p.pessoas) AS valor
+        FROM pca p
+        JOIN sensores s ON s.id_sensor = p.id_sensor
+        JOIN setores st ON st.id_setor = s.id_setor
+        WHERE p.data >= DATE_SUB(?, INTERVAL 1 DAY)
+        GROUP BY st.nome_setor
+        ORDER BY valor DESC LIMIT 1
     `, [anchor]);
 
     // Sensores ativos
@@ -267,7 +271,8 @@ router.get("/dashboard/resumo", wrap(async (req, res) => {
         pico_co2_valor:    picoCO2[0] ? picoCO2[0].valor.toFixed(0) : 0,
         pico_voc_setor:    picoVOC[0] ? picoVOC[0].nome_setor : "N/D",
         pico_voc_valor:    picoVOC[0] ? picoVOC[0].valor.toFixed(0) : 0,
-        eventos_odor_hoje: eventosOdor[0].total,
+        pico_lotacao_setor: picoLotacao[0] ? picoLotacao[0].nome_setor : "N/D",
+        pico_lotacao_valor: picoLotacao[0] ? picoLotacao[0].valor : 0,
         sensores_ativos:   sensoresAtivos[0].total,
     });
 }));
@@ -315,6 +320,14 @@ router.get("/dashboard/heatmap", wrap(async (req, res) => {
         if (co2 > 1000 || voc > 400) status = "CRITICO";
         else if (co2 > 800 || voc > 250) status = "ATENCAO";
 
+        // Buscar alertas ativos para este setor para saber quais parâmetros estão em risco
+        const [alertasAtivos] = await db.query(`
+            SELECT DISTINCT parametro FROM alertas 
+            WHERE id_setor = ? AND status != 'RESOLVIDO'
+        `, [setor.id_setor]);
+
+        const parametrosEmRisco = alertasAtivos.map(a => a.parametro.toUpperCase());
+
         return {
             id_setor:         setor.id_setor,
             nome_setor:       setor.nome_setor,
@@ -325,6 +338,7 @@ router.get("/dashboard/heatmap", wrap(async (req, res) => {
             voc_atual:        parseFloat((voc || 0).toFixed(0)),
             status,
             alertas_24h:      alertas24h[0].total,
+            parametros_em_risco: parametrosEmRisco,
             historico:        historicoCO2.map(r => parseFloat((r.co2 || 0).toFixed(0))).reverse()
         };
     }));
@@ -332,37 +346,43 @@ router.get("/dashboard/heatmap", wrap(async (req, res) => {
     res.json(resultado);
 }));
 
+const Alerta = require("../models/Alerta");
+const Equipe = require("../models/Equipe");
+
 // ============================================================
 // ROTA 7: Alertas com filtros opcionais
-//         Usado por central_alerta.ejs
 // ============================================================
 router.get("/alertas", wrap(async (req, res) => {
-    const { severidade, status, id_setor } = req.query;
-
-    let where = "WHERE 1=1";
-    const params = [];
-    if (severidade) { where += " AND a.severidade = ?"; params.push(severidade); }
-    if (status)     { where += " AND a.status = ?";     params.push(status); }
-    if (id_setor)   { where += " AND a.id_setor = ?";   params.push(id_setor); }
-
-    const [rows] = await db.query(`
-        SELECT
-            a.id_alerta, a.id_setor,
-            a.parametro, a.valor_medido, a.limite_referencia, a.unidade,
-            a.severidade, a.status,
-            DATE_FORMAT(a.disparado_em,'%d/%m %H:%i:%s') AS data_hora,
-            TIMESTAMPDIFF(MINUTE, a.disparado_em, IFNULL(a.atendimento_iniciado_em, NOW())) AS minutos_ate_atendimento,
-            TIMESTAMPDIFF(MINUTE, a.disparado_em, NOW()) AS minutos_desde_disparo,
-            st.nome_setor,
-            a.descricao
-        FROM alertas a
-        JOIN setores st ON st.id_setor = a.id_setor
-        ${where}
-        ORDER BY a.disparado_em DESC
-        LIMIT 50
-    `, params);
-
+    const rows = await Alerta.listar(req.query);
     res.json(rows);
+}));
+
+// ============================================================
+// ROTA 7.1: Lista de Equipe
+// ============================================================
+router.get("/equipe", wrap(async (req, res) => {
+    const rows = await Equipe.listar();
+    res.json(rows);
+}));
+
+// ============================================================
+// ROTA 7.2: Transferir Responsabilidade
+// ============================================================
+router.post("/alertas/:id/transferir", wrap(async (req, res) => {
+    try {
+        const idAlerta = parseInt(req.params.id, 10);
+        if (isNaN(idAlerta)) {
+            throw new Error(`ID do alerta inválido recebido pelo backend: ${req.params.id}`);
+        }
+        
+        const { id_profissional } = req.body;
+        console.log(`[API] Tentando transferir alerta ${idAlerta} para profissional ${id_profissional}`);
+        await Alerta.transferir(idAlerta, id_profissional);
+        res.json({ sucesso: true });
+    } catch (e) {
+        console.error("[API] Erro detalhado ao transferir:", e);
+        res.status(500).json({ error: true, erro: e.message, stack: e.stack });
+    }
 }));
 
 // ============================================================
@@ -370,52 +390,8 @@ router.get("/alertas", wrap(async (req, res) => {
 //         Usado pela central_alerta.ejs
 // ============================================================
 router.get("/alertas/kpis", wrap(async (req, res) => {
-    const anchor = await getLatestAlertTimestamp();
-
-    // KPIs da última semana (baseado na âncora)
-    const [kpis] = await db.query(`
-        SELECT
-            COUNT(*) AS total_alertas,
-            AVG(TIMESTAMPDIFF(MINUTE, disparado_em, atendimento_iniciado_em)) AS tempo_medio_resposta_min,
-            AVG(TIMESTAMPDIFF(MINUTE, disparado_em, normalizado_em))           AS tempo_medio_resolucao_min,
-            CASE 
-                WHEN COUNT(*) > 0 THEN
-                    SUM(CASE WHEN atendimento_iniciado_em IS NOT NULL
-                              AND TIMESTAMPDIFF(MINUTE, disparado_em, atendimento_iniciado_em) <= 15
-                        THEN 1 ELSE 0 END) / COUNT(*) * 100
-                ELSE 0 
-            END AS pct_resposta_no_sla
-        FROM alertas
-        WHERE disparado_em >= DATE_SUB(?, INTERVAL 7 DAY)
-    `, [anchor]);
-
-    // Semana anterior para calcular variação (8 a 14 dias atrás da âncora)
-    const [kpisAnterior] = await db.query(`
-        SELECT AVG(TIMESTAMPDIFF(MINUTE, disparado_em, atendimento_iniciado_em)) AS tempo_medio
-        FROM alertas
-        WHERE disparado_em BETWEEN DATE_SUB(?, INTERVAL 14 DAY) AND DATE_SUB(?, INTERVAL 7 DAY)
-    `, [anchor, anchor]);
-
-    // Setores com alerta CRITICO aberto agora (ou na data do último alerta)
-    const [setoresCriticos] = await db.query(`
-        SELECT DISTINCT st.nome_setor
-        FROM alertas a
-        JOIN setores st ON st.id_setor = a.id_setor
-        WHERE a.severidade = 'CRITICO' AND a.status = 'ABERTO'
-    `);
-
-    const tmAtual    = kpis[0].tempo_medio_resposta_min || 0;
-    const tmAnterior = kpisAnterior[0].tempo_medio       || 0;
-    const variacao   = tmAnterior ? (((tmAtual - tmAnterior) / tmAnterior) * 100).toFixed(1) : 0;
-
-    res.json({
-        total_alertas:            kpis[0].total_alertas,
-        tempo_medio_resposta_min: parseFloat((tmAtual || 0).toFixed(1)),
-        tempo_medio_resolucao_min: parseFloat((kpis[0].tempo_medio_resolucao_min || 0).toFixed(1)),
-        pct_resposta_no_sla:      parseFloat((kpis[0].pct_resposta_no_sla || 0).toFixed(1)),
-        variacao_resposta_pct:    parseFloat(variacao),
-        setores_criticos:         setoresCriticos.map(r => r.nome_setor),
-    });
+    const kpis = await Alerta.getKPIs();
+    res.json(kpis);
 }));
 
 // ============================================================
@@ -423,18 +399,7 @@ router.get("/alertas/kpis", wrap(async (req, res) => {
 //         Mini gráfico de barras da central_alerta.ejs
 // ============================================================
 router.get("/alertas/historico", wrap(async (req, res) => {
-    const anchor = await getLatestAlertTimestamp();
-
-    const [rows] = await db.query(`
-        SELECT
-            DATE_FORMAT(disparado_em,'%d/%m') AS dia,
-            COUNT(*) AS total_disparados,
-            SUM(CASE WHEN status = 'RESOLVIDO' THEN 1 ELSE 0 END) AS total_resolvidos
-        FROM alertas
-        WHERE disparado_em >= DATE_SUB(?, INTERVAL 7 DAY)
-        GROUP BY DATE(disparado_em)
-        ORDER BY DATE(disparado_em)
-    `, [anchor]);
+    const rows = await Alerta.getHistorico();
     res.json(rows);
 }));
 

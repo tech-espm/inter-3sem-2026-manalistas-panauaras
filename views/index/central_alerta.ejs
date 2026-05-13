@@ -263,14 +263,14 @@
                   </div>
                   <div>
                     <p class="detail-responsible-name">
-                      Eng. Carla Mendes
+                      Eng. Marcos Selmini
                     </p>
                     <p class="detail-responsible-role">
                       Engenharia Clínica / Manutenção
                     </p>
                   </div>
                 </div>
-                <button class="detail-transfer-button">
+                <button class="detail-transfer-button" onclick="abrirModalTransferencia()">
                   Transferir Responsabilidade
                 </button>
               </div>
@@ -483,6 +483,81 @@
           <button type="submit" class="btn-primary">Registrar Ticket</button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalhes do Alerta -->
+<div class="modal fade" id="modalDetalhes" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detalhes do Alerta <span id="detalheId">#--</span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <p><strong>Setor:</strong> <span id="detalheSetor">--</span></p>
+            <p><strong>Data/Hora:</strong> <span id="detalheData">--</span></p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Status:</strong> <span id="detalheStatusPill" class="status-pill">--</span></p>
+          </div>
+        </div>
+        <div class="mb-4">
+          <p><strong>Descrição:</strong></p>
+          <p id="detalheDescricao" class="text-muted">--</p>
+        </div>
+
+        <hr>
+
+        <div class="detail-responsible mt-4">
+          <h4 class="detail-subtitle mb-3">Responsável Atual</h4>
+          <div class="detail-responsible-row d-flex align-items-center mb-3">
+            <div class="detail-responsible-avatar me-3">
+              <span class="material-symbols-outlined detail-responsible-icon" style="font-size: 2rem;">person</span>
+            </div>
+            <div>
+              <p class="detail-responsible-name mb-0 fw-bold">--</p>
+              <p class="detail-responsible-role text-muted mb-0">--</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Transferência de Responsabilidade -->
+<div class="modal fade" id="modalTransferencia" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Transferir Responsabilidade</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted mb-4">Selecione um profissional da equipe para assumir este alerta.</p>
+        <form id="formTransferencia">
+          <div class="mb-3">
+            <label class="form-label">Profissional Responsável</label>
+            <select class="form-select" id="selectResponsavel" required>
+              <option value="">Carregando equipe...</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Observação / Motivo</label>
+            <textarea class="form-control" rows="3"
+              placeholder="Ex: Encaminhado para engenharia clínica por falta de peças."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="confirmarTransferencia()">Confirmar
+          Transferência</button>
+      </div>
     </div>
   </div>
 </div>
@@ -818,6 +893,7 @@
     };
 
     let allAlertas = [];
+    let idAlertaSelecionado = null;
     const filters = {
       setor: 'all',
       tipo: 'all',
@@ -825,6 +901,109 @@
       status: 'all',
       search: ''
     };
+
+    function verDetalhes(id) {
+      const a = allAlertas.find(x => x.id_alerta == id);
+      if (!a) return;
+
+      idAlertaSelecionado = id;
+
+      document.getElementById('detalheId').innerText = `#${a.id_alerta}`;
+      document.getElementById('detalheSetor').innerText = a.nome_setor;
+      document.getElementById('detalheData').innerText = a.data_hora;
+      document.getElementById('detalheDescricao').innerText = a.descricao || 'Sem descrição adicional.';
+
+      const sp = document.getElementById('detalheStatusPill');
+      sp.innerText = a.status;
+      sp.className = `status-pill ${STATUS_PILLS[a.status] || ''}`;
+
+      const respNome = document.querySelector('.detail-responsible-name');
+      const respCargo = document.querySelector('.detail-responsible-role');
+
+      if (a.nome_responsavel) {
+        respNome.innerText = a.nome_responsavel;
+        respCargo.innerText = a.cargo_responsavel;
+      } else {
+        respNome.innerText = "Não atribuído";
+        respCargo.innerText = "Aguardando responsável";
+      }
+
+      const modal = new bootstrap.Modal(document.getElementById('modalDetalhes'));
+      modal.show();
+    }
+
+    async function abrirModalTransferencia() {
+      // Se não clicou em nenhum alerta no olho, assume o primeiro da lista para o botão do painel
+      if (!idAlertaSelecionado && allAlertas.length > 0) {
+        idAlertaSelecionado = allAlertas[0].id_alerta;
+      }
+
+      const select = document.getElementById('selectResponsavel');
+      select.innerHTML = '<option value="">Carregando equipe...</option>';
+
+      try {
+        const equipe = await (await fetch('/api/equipe')).json();
+        select.innerHTML = '<option value="">Selecione um profissional...</option>';
+        equipe.forEach(p => {
+          select.insertAdjacentHTML('beforeend', `<option value="${p.id_profissional}" data-nome="${p.nome}" data-cargo="${p.cargo}">${p.nome} (${p.cargo})</option>`);
+        });
+
+        const modal = new bootstrap.Modal(document.getElementById('modalTransferencia'));
+        modal.show();
+      } catch (e) {
+        alert('Erro ao carregar equipe');
+      }
+    }
+
+    async function confirmarTransferencia() {
+      const idProfissional = document.getElementById('selectResponsavel').value;
+      if (!idProfissional) return alert('Selecione um responsável');
+      if (!idAlertaSelecionado) return alert('ERRO CRÍTICO DO SISTEMA: Nenhum alerta foi selecionado (idAlertaSelecionado está null). Atualize a página e tente novamente.');
+
+      try {
+        const res = await fetch(`/api/alertas/${idAlertaSelecionado}/transferir`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id_profissional: idProfissional })
+        });
+
+        if (res.ok) {
+          const opt = document.getElementById('selectResponsavel').options[document.getElementById('selectResponsavel').selectedIndex];
+          const novoNome = opt.getAttribute('data-nome');
+          const novoCargo = opt.getAttribute('data-cargo');
+
+          // Atualiza em todos os lugares (painel e modal)
+          document.querySelectorAll('.detail-responsible-name').forEach(el => el.innerText = novoNome);
+          document.querySelectorAll('.detail-responsible-role').forEach(el => el.innerText = novoCargo);
+
+          const modalTransf = bootstrap.Modal.getInstance(document.getElementById('modalTransferencia'));
+          if (modalTransf) modalTransf.hide();
+
+          const modalDet = bootstrap.Modal.getInstance(document.getElementById('modalDetalhes'));
+          if (modalDet) modalDet.hide();
+
+          carregarAlertas();
+
+          if (window.Swal) {
+            Swal.fire({
+              title: 'Transferência Concluída!',
+              text: `A responsabilidade foi transferida para ${novoNome}.`,
+              icon: 'success',
+              confirmButtonColor: '#136dec'
+            });
+          } else {
+            alert('Responsabilidade transferida com sucesso!');
+          }
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          alert('Erro do servidor: ' + (errData.mensagem || errData.erro || errData.error || res.statusText));
+          console.error("Erro completo:", errData);
+        }
+      } catch (e) {
+        alert('Erro ao transferir: ' + e.message);
+        console.error("Erro na requisição:", e);
+      }
+    }
 
     async function carregarKPIs() {
       try {

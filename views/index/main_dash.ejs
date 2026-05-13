@@ -51,10 +51,11 @@
       <hr class="card-divider" />
 
       <h3 class="card-title">Tipos de Risco</h3>
-      <div class="chip-group">
-        <button class="chip chip-active">Ventilação</button>
-        <button class="chip">Sanitário</button>
-        <button class="chip">Conforto</button>
+      <div class="chip-group" id="riscoFiltros">
+        <button class="chip chip-active" data-risco="all">Todos</button>
+        <button class="chip" data-risco="ventilacao">Ventilação</button>
+        <button class="chip" data-risco="sanitario">Sanitário</button>
+        <button class="chip" data-risco="conforto">Conforto</button>
       </div>
 
       <hr class="card-divider" />
@@ -62,7 +63,7 @@
       <div class="toggle-wrapper">
         <span class="toggle-label">Apenas Alertas</span>
         <label class="toggle-label-wrapper">
-          <input class="toggle-input" type="checkbox" />
+          <input class="toggle-input" type="checkbox" id="toggleAlertas" />
           <div class="toggle"></div>
         </label>
       </div>
@@ -97,12 +98,12 @@
 
       <div class="highlight-card highlight-card-primary">
         <div class="highlight-icon highlight-icon-primary">
-          <span class="material-symbols-outlined">clean_hands</span>
+          <span class="material-symbols-outlined">groups</span>
         </div>
         <div>
-          <p class="highlight-label">Eventos de Odor (Hoje)</p>
-          <h4 class="highlight-title">—</h4>
-          <p id="eventosOdorHoje" class="highlight-meta highlight-meta-primary">-- ocorrências</p>
+          <p class="highlight-label">Maior Lotação</p>
+          <h4 id="picoLotacaoSetor" class="highlight-title">--</h4>
+          <p id="picoLotacaoValor" class="highlight-meta highlight-meta-primary">-- pessoas</p>
         </div>
       </div>
     </section>
@@ -213,7 +214,8 @@
         document.getElementById('picoCO2Valor').innerText = `${d.pico_co2_valor} ppm`;
         document.getElementById('picoVOCSetor').innerText = d.pico_voc_setor;
         document.getElementById('picoVOCValor').innerText = `${d.pico_voc_valor} ppb`;
-        document.getElementById('eventosOdorHoje').innerText = `${d.eventos_odor_hoje} ocorrências`;
+        document.getElementById('picoLotacaoSetor').innerText = d.pico_lotacao_setor;
+        document.getElementById('picoLotacaoValor').innerText = `${d.pico_lotacao_valor} pessoas`;
 
         // Status Bar
         document.getElementById('ultimaAtualizacao').innerText = `Última atualização: ${d.hora_medicao}`;
@@ -228,18 +230,41 @@
       } catch (e) { console.error('Erro ao carregar heatmap:', e); }
     }
 
+    let riscoAtivo = 'all';
+
     function renderizarHeatmap() {
       const grid = document.getElementById('heatmapGrid');
       grid.innerHTML = '';
 
-      // Pega tipos selecionados
-      const selecionados = Array.from(document.querySelectorAll('.filter-checkbox:checked'))
+      // 1. Filtro por Categoria (UTI, Enfermaria, etc)
+      const categoriasSelecionadas = Array.from(document.querySelectorAll('.filter-checkbox:checked'))
         .map(cb => cb.value);
 
-      const filtrados = setoresCache.filter(s => selecionados.includes(s.tipo_setor));
+      let filtrados = setoresCache.filter(s => categoriasSelecionadas.includes(s.tipo_setor));
+
+      // 2. Filtro "Apenas Alertas"
+      const apenasAlertas = document.getElementById('toggleAlertas').checked;
+      if (apenasAlertas) {
+        filtrados = filtrados.filter(s => s.status !== 'NORMAL');
+      }
+
+      // 3. Filtro por Tipo de Risco (Baseado nos parâmetros em alerta vindos da API)
+      if (riscoAtivo !== 'all') {
+        const mapeamentoRisco = {
+          ventilacao: ['CO2', 'VOC', 'GAS'],
+          sanitario:  ['VOC', 'ODOR', 'UMIDADE'],
+          conforto:   ['TEMP', 'UMIDADE', 'RUIDO', 'LUMINOSIDADE']
+        };
+        const parametrosAlvo = mapeamentoRisco[riscoAtivo] || [];
+        filtrados = filtrados.filter(s => {
+          return s.parametros_em_risco.some(p => parametrosAlvo.includes(p));
+        });
+      }
 
       if (filtrados.length === 0) {
-        grid.innerHTML = '<p style="opacity:0.5;padding:1rem">Nenhum setor selecionado ou encontrado.</p>';
+        grid.innerHTML = `<p style="opacity:0.5;padding:2rem;text-align:center;width:100%">
+          Nenhum setor encontrado com os filtros atuais.
+        </p>`;
         return;
       }
 
@@ -276,9 +301,22 @@
       });
     }
 
-    // Event Listeners para filtros
+    // Event Listeners para filtros de Categoria
     document.querySelectorAll('.filter-checkbox').forEach(cb => {
       cb.addEventListener('change', renderizarHeatmap);
+    });
+
+    // Event Listener para "Apenas Alertas"
+    document.getElementById('toggleAlertas').addEventListener('change', renderizarHeatmap);
+
+    // Event Listeners para Chips de Risco
+    document.querySelectorAll('#riscoFiltros .chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#riscoFiltros .chip').forEach(b => b.classList.remove('chip-active'));
+        btn.classList.add('chip-active');
+        riscoAtivo = btn.dataset.risco;
+        renderizarHeatmap();
+      });
     });
 
     function reloadDash() {

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "start": "node app"
+    "start": "node scripts/migrate.js && node app"
   },
   "dependencies": {
     "compression": "1.8.1",
