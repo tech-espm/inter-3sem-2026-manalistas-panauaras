@@ -70,10 +70,14 @@ router.get("/setores", wrap(async (req, res) => {
 // ============================================================
 router.get("/sensores/resumo", wrap(async (req, res) => {
     const id_setor = parseInt(req.query.id_setor) || 1;
+    const periodo = req.query.periodo || "24h";
+    let hours = 24;
+    if (periodo === "1h") hours = 1;
+    else if (periodo === "12h") hours = 12;
+
     const anchor = await getLatestTimestamp();
 
     // Busca o sensor PCA do setor (se houver) para temp/umid
-    console.log(`[API] Resumo solicitado - Query: ${JSON.stringify(req.query)} -> ID Setor: ${id_setor}`);
     const [sensorPca] = await db.query(
         `SELECT id_sensor FROM sensores WHERE id_setor = ? AND tipo_sensor = 'HPD2' LIMIT 1`,
         [id_setor]
@@ -86,39 +90,40 @@ router.get("/sensores/resumo", wrap(async (req, res) => {
         // Se temos PCA e não é a UTI (setor 1), pegamos temp/umid do PCA e co2/voc do Creative (setor 1)
         sqlAtual = `
             SELECT 
-                (SELECT AVG(co2) FROM creative WHERE data >= DATE_SUB(?, INTERVAL 1 DAY)) as co2,
-                (SELECT AVG(voc) FROM creative WHERE data >= DATE_SUB(?, INTERVAL 1 DAY)) as voc,
+                (SELECT AVG(co2) FROM creative WHERE data >= DATE_SUB(?, INTERVAL ${hours} HOUR)) as co2,
+                (SELECT AVG(voc) FROM creative WHERE data >= DATE_SUB(?, INTERVAL ${hours} HOUR)) as voc,
                 AVG(p.temperatura) as temp, AVG(p.umidade) as umidade,
                 AVG(p.pessoas) as pessoas,
                 DATE_FORMAT(MAX(p.data),'%H:%i') as hora_medicao
             FROM pca p
-            WHERE p.id_sensor = ${sensorPca[0].id_sensor} AND p.data >= DATE_SUB(?, INTERVAL 1 DAY)
+            WHERE p.id_sensor = ${sensorPca[0].id_sensor} AND p.data >= DATE_SUB(?, INTERVAL ${hours} HOUR)
         `;
         paramsAtual = [anchor, anchor, anchor];
 
         sqlAnterior = `
             SELECT 
-                (SELECT AVG(co2) FROM creative WHERE data BETWEEN DATE_SUB(?, INTERVAL 2 DAY) AND DATE_SUB(?, INTERVAL 1 DAY)) as co2,
-                (SELECT AVG(voc) FROM creative WHERE data BETWEEN DATE_SUB(?, INTERVAL 2 DAY) AND DATE_SUB(?, INTERVAL 1 DAY)) as voc,
+                (SELECT AVG(co2) FROM creative WHERE data BETWEEN DATE_SUB(?, INTERVAL ${hours * 2} HOUR) AND DATE_SUB(?, INTERVAL ${hours} HOUR)) as co2,
+                (SELECT AVG(voc) FROM creative WHERE data BETWEEN DATE_SUB(?, INTERVAL ${hours * 2} HOUR) AND DATE_SUB(?, INTERVAL ${hours} HOUR)) as voc,
                 AVG(p.temperatura) as temp, AVG(p.umidade) as umidade,
                 AVG(p.pessoas) as pessoas
             FROM pca p
-            WHERE p.id_sensor = ${sensorPca[0].id_sensor} AND p.data BETWEEN DATE_SUB(?, INTERVAL 2 DAY) AND DATE_SUB(?, INTERVAL 1 DAY)
+            WHERE p.id_sensor = ${sensorPca[0].id_sensor} AND p.data BETWEEN DATE_SUB(?, INTERVAL ${hours * 2} HOUR) AND DATE_SUB(?, INTERVAL ${hours} HOUR)
         `;
         paramsAnterior = [anchor, anchor, anchor, anchor, anchor, anchor];
     } else {
+        // Senão, tudo do Creative
         sqlAtual = `
             SELECT AVG(co2) co2, AVG(voc) voc, AVG(temperatura) temp, AVG(umidade) umidade,
                    DATE_FORMAT(MAX(data),'%H:%i') hora_medicao
             FROM creative
-            WHERE data >= DATE_SUB(?, INTERVAL 1 DAY)
+            WHERE data >= DATE_SUB(?, INTERVAL ${hours} HOUR)
         `;
         paramsAtual = [anchor];
 
         sqlAnterior = `
             SELECT AVG(co2) co2, AVG(voc) voc, AVG(temperatura) temp, AVG(umidade) umidade
             FROM creative
-            WHERE data BETWEEN DATE_SUB(?, INTERVAL 2 DAY) AND DATE_SUB(?, INTERVAL 1 DAY)
+            WHERE data BETWEEN DATE_SUB(?, INTERVAL ${hours * 2} HOUR) AND DATE_SUB(?, INTERVAL ${hours} HOUR)
         `;
         paramsAnterior = [anchor, anchor];
     }
@@ -238,13 +243,21 @@ router.get("/graficos/ocupacao", wrap(async (req, res) => {
 router.get("/graficos/ambiental", wrap(async (req, res) => {
     const periodo = req.query.periodo || "24h";
     const id_setor = parseInt(req.query.id_setor) || 1;
-    let intervalHours;
-    if (periodo === "7d")  intervalHours = 7 * 24;
-    else if (periodo === "30d") intervalHours = 30 * 24;
-    else intervalHours = 24;
+    let intervalHours = 24;
+    let grouping = "%Y-%m-%d %H"; // Hora a hora por padrão
+    let formatLabel = "%H:%i";
+
+    if (periodo === "1h") {
+        intervalHours = 1;
+        grouping = "%Y-%m-%d %H:%i"; // Minuto a minuto para 1h
+        formatLabel = "%H:%i";
+    } else if (periodo === "12h") {
+        intervalHours = 12;
+    }
 
     const anchor = await getLatestTimestamp();
 
+    // Busca o sensor PCA do setor (se houver) para temp/umid
     const [sensorPca] = await db.query(
         `SELECT id_sensor FROM sensores WHERE id_setor = ? AND tipo_sensor = 'HPD2' LIMIT 1`,
         [id_setor]
@@ -253,18 +266,18 @@ router.get("/graficos/ambiental", wrap(async (req, res) => {
     let sql;
     let params;
     if (sensorPca[0] && id_setor !== 1) {
-        // JOIN entre creative (co2/voc) e pca (temp/humid/pessoas) por hora
+        // JOIN entre creative (co2/voc) e pca (temp/humid/pessoas) por hora/dia
         sql = `
             SELECT 
                 c.co2, c.voc, p.temp, p.humid, p.pessoas, c.hora
             FROM (
-                SELECT AVG(co2) co2, AVG(voc) voc, DATE_FORMAT(data,'%Y-%m-%d %H') hr, DATE_FORMAT(data,'%d/%m %H:%i') hora
+                SELECT AVG(co2) co2, AVG(voc) voc, DATE_FORMAT(data,'${grouping}') hr, DATE_FORMAT(data,'${formatLabel}') hora
                 FROM creative
                 WHERE data >= DATE_SUB(?, INTERVAL ${intervalHours} HOUR)
                 GROUP BY hr
             ) c
             LEFT JOIN (
-                SELECT AVG(temperatura) temp, AVG(umidade) humid, AVG(pessoas) as pessoas, DATE_FORMAT(data,'%Y-%m-%d %H') hr
+                SELECT AVG(temperatura) temp, AVG(umidade) humid, AVG(pessoas) as pessoas, DATE_FORMAT(data,'${grouping}') hr
                 FROM pca
                 WHERE id_sensor = ${sensorPca[0].id_sensor} AND data >= DATE_SUB(?, INTERVAL ${intervalHours} HOUR)
                 GROUP BY hr
@@ -277,10 +290,10 @@ router.get("/graficos/ambiental", wrap(async (req, res) => {
             SELECT 
                 AVG(co2) AS co2, AVG(voc) AS voc,
                 AVG(temperatura) AS temp, AVG(umidade) AS humid,
-                DATE_FORMAT(data,'%d/%m %H:%i') AS hora
+                DATE_FORMAT(data,'${formatLabel}') AS hora
             FROM creative
             WHERE data >= DATE_SUB(?, INTERVAL ${intervalHours} HOUR)
-            GROUP BY DATE_FORMAT(data,'%Y-%m-%d %H')
+            GROUP BY DATE_FORMAT(data,'${grouping}')
             ORDER BY MIN(data)
         `;
         params = [anchor];
@@ -598,10 +611,11 @@ router.get("/sensores/eventos", wrap(async (req, res) => {
 router.get("/tendencia/compliance", wrap(async (req, res) => {
     const periodo = req.query.periodo || "24h";
     const id_setor = parseInt(req.query.id_setor) || 1;
+    const anchor = await getLatestTimestamp();
     let interval;
-    if (periodo === "7d")       interval = "7 DAY";
-    else if (periodo === "30d") interval = "30 DAY";
-    else                        interval = "1 DAY";
+    if (periodo === "1h")       interval = "1 HOUR";
+    else if (periodo === "12h") interval = "12 HOUR";
+    else                        interval = "24 HOUR";
 
     const [sensorPca] = await db.query(
         `SELECT id_sensor FROM sensores WHERE id_setor = ? AND tipo_sensor = 'HPD2' LIMIT 1`,
@@ -613,19 +627,20 @@ router.get("/tendencia/compliance", wrap(async (req, res) => {
         sql = `
             SELECT
                 COUNT(*) AS total,
-                (SELECT SUM(CASE WHEN co2 <= 1000 THEN 1 ELSE 0 END) FROM creative WHERE data >= DATE_SUB(NOW(), INTERVAL ${interval})) AS co2_ok,
-                (SELECT SUM(CASE WHEN voc <= 400  THEN 1 ELSE 0 END) FROM creative WHERE data >= DATE_SUB(NOW(), INTERVAL ${interval})) AS voc_ok,
+                (SELECT SUM(CASE WHEN co2 <= 1000 THEN 1 ELSE 0 END) FROM creative WHERE data >= DATE_SUB(?, INTERVAL ${interval})) AS co2_ok,
+                (SELECT SUM(CASE WHEN voc <= 400  THEN 1 ELSE 0 END) FROM creative WHERE data >= DATE_SUB(?, INTERVAL ${interval})) AS voc_ok,
                 SUM(CASE WHEN temperatura <= 26 AND temperatura >= 18 THEN 1 ELSE 0 END) AS temp_ok,
                 SUM(CASE WHEN umidade <= 70 AND umidade >= 30 THEN 1 ELSE 0 END)         AS umidade_ok,
-                (SELECT SUM(CASE WHEN ruido <= 70   THEN 1 ELSE 0 END) FROM creative WHERE data >= DATE_SUB(NOW(), INTERVAL ${interval})) AS ruido_ok,
-                (SELECT MAX(co2) FROM creative WHERE data >= DATE_SUB(NOW(), INTERVAL ${interval})) AS max_co2,
-                (SELECT MAX(voc) FROM creative WHERE data >= DATE_SUB(NOW(), INTERVAL ${interval})) AS max_voc,
+                (SELECT SUM(CASE WHEN ruido <= 70   THEN 1 ELSE 0 END) FROM creative WHERE data >= DATE_SUB(?, INTERVAL ${interval})) AS ruido_ok,
+                (SELECT MAX(co2) FROM creative WHERE data >= DATE_SUB(?, INTERVAL ${interval})) AS max_co2,
+                (SELECT MAX(voc) FROM creative WHERE data >= DATE_SUB(?, INTERVAL ${interval})) AS max_voc,
                 MAX(temperatura) AS max_temp,
                 MAX(umidade) AS max_umidade,
-                (SELECT MAX(ruido) FROM creative WHERE data >= DATE_SUB(NOW(), INTERVAL ${interval})) AS max_ruido
+                (SELECT MAX(ruido) FROM creative WHERE data >= DATE_SUB(?, INTERVAL ${interval})) AS max_ruido
             FROM pca
-            WHERE id_sensor = ${sensorPca[0].id_sensor} AND data >= DATE_SUB(NOW(), INTERVAL ${interval})
+            WHERE id_sensor = ${sensorPca[0].id_sensor} AND data >= DATE_SUB(?, INTERVAL ${interval})
         `;
+        params = [anchor, anchor, anchor, anchor, anchor, anchor, anchor];
     } else {
         sql = `
             SELECT
@@ -638,8 +653,9 @@ router.get("/tendencia/compliance", wrap(async (req, res) => {
                 MAX(co2) AS max_co2, MAX(voc) AS max_voc, MAX(temperatura) AS max_temp,
                 MAX(umidade) AS max_umidade, MAX(ruido) AS max_ruido
             FROM creative
-            WHERE data >= DATE_SUB(NOW(), INTERVAL ${interval})
+            WHERE data >= DATE_SUB(?, INTERVAL ${interval})
         `;
+        params = [anchor];
     }
 
     const [rows] = await db.query(sql);

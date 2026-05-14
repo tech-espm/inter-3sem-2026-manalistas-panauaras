@@ -43,9 +43,9 @@
               <div class="filter-field">
                 <label class="filter-label">Período</label>
                 <div class="period-toggle">
+                  <button class="period-btn" data-periodo="1h">1h</button>
+                  <button class="period-btn" data-periodo="12h">12h</button>
                   <button class="period-btn period-btn-active" data-periodo="24h">24h</button>
-                  <button class="period-btn" data-periodo="7d">7d</button>
-                  <button class="period-btn" data-periodo="30d">30d</button>
                 </div>
               </div>
 
@@ -226,7 +226,15 @@
       </div>
     </div>
 
-<%- contentFor('espaco-rodape') %>
+<%- contentFor("espaco-rodape") %>
+  <style>
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    /* Estilos do Modal Centralizado */
+  </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   let graficoMulti = null;
@@ -269,7 +277,7 @@
 
   async function carregarResumo() {
     try {
-      const sParam = idSetorAtual === 'all' ? '' : `?id_setor=${idSetorAtual}`;
+      const sParam = idSetorAtual === 'all' ? `?periodo=${periodoAtual}` : `?id_setor=${idSetorAtual}&periodo=${periodoAtual}`;
       const r = await (await fetch(`/api/sensores/resumo${sParam}`)).json();
 
       function setKPI(idValor, idChip, idChipTexto, valor, variacao, unidade) {
@@ -350,10 +358,13 @@
       const { global, parametros } = await (await fetch(`/api/tendencia/compliance?periodo=${periodoAtual}${sParam}`)).json();
       document.getElementById('complianceGlobalTexto').innerText = `${global}% COMPLIANCE GLOBAL`;
       
-      // Heartbeat visual para debug
+      // Status de Sincronização Elegante
+      const setorNome = document.getElementById('selectAmbiente').options[document.getElementById('selectAmbiente').selectedIndex].text;
       document.querySelector('.page-subtitle').innerHTML = `
-        <span style="color:var(--color-primary); font-weight:bold;">Setor Ativo: ${idSetorAtual}</span> | 
-        Sincronizado em: ${new Date().toLocaleTimeString()}
+        <span style="display:inline-flex; align-items:center; gap:8px;">
+          <span style="width:8px; height:8px; background:#10b981; border-radius:50%; display:inline-block; animation: pulse 2s infinite;"></span>
+          Setor: <b>${setorNome}</b> | Última sincronização: ${new Date().toLocaleTimeString()}
+        </span>
       `;
 
       const tbody = document.getElementById('complianceTbody');
