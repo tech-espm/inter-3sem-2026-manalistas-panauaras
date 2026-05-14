@@ -15,7 +15,6 @@
               </p>
             </div>
           </div>
-
         </header>
 
         <main class="central-main central-main-narrow">
@@ -177,7 +176,7 @@
           </section>
 
           <!-- Compliance Table -->
-          <section class="card compliance-card">
+          <section class="card compliance-card mb-8">
             <div class="compliance-header">
               <h3 class="compliance-title">
                 <span class="material-symbols-outlined graph-title-icon">verified</span>
@@ -233,7 +232,17 @@
       70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
       100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
-    /* Estilos do Modal Centralizado */
+    .compliance-card {
+      margin-top: 2rem;
+    }
+    .compliance-global-badge {
+      background: var(--color-primary);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
   </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -359,7 +368,8 @@
       document.getElementById('complianceGlobalTexto').innerText = `${global}% COMPLIANCE GLOBAL`;
       
       // Status de Sincronização Elegante
-      const setorNome = document.getElementById('selectAmbiente').options[document.getElementById('selectAmbiente').selectedIndex].text;
+      const selAmb = document.getElementById('selectAmbiente');
+      const setorNome = selAmb.options[selAmb.selectedIndex].text;
       document.querySelector('.page-subtitle').innerHTML = `
         <span style="display:inline-flex; align-items:center; gap:8px;">
           <span style="width:8px; height:8px; background:#10b981; border-radius:50%; display:inline-block; animation: pulse 2s infinite;"></span>

@@ -473,7 +473,14 @@ const Equipe = require("../models/Equipe");
 // ROTA 7: Alertas com filtros opcionais
 // ============================================================
 router.get("/alertas", wrap(async (req, res) => {
-    const rows = await Alerta.listar(req.query);
+    const { severidade, status, id_setor, pagina, limite } = req.query;
+    const rows = await Alerta.listar({ 
+        severidade, 
+        status, 
+        id_setor,
+        pagina: parseInt(pagina) || 1,
+        limite: parseInt(limite) || 10
+    });
     res.json(rows);
 }));
 
@@ -531,18 +538,23 @@ router.get("/graficos/sensor", wrap(async (req, res) => {
     const id_sensor = parseInt(req.query.id_sensor) || 1;
     const timestamp = req.query.em_torno_de || null;
 
+    // Descobre se o sensor é Creative ou PCA
+    const [sensorInfo] = await db.query(`SELECT tipo_sensor FROM sensores WHERE id_sensor = ?`, [id_sensor]);
+    const tipo = sensorInfo[0] ? sensorInfo[0].tipo_sensor : 'CREATIVE';
+
     let whereData = timestamp
-        ? `AND data BETWEEN DATE_SUB('${timestamp}', INTERVAL 30 MINUTE) AND DATE_ADD('${timestamp}', INTERVAL 30 MINUTE)`
-        : `AND data >= DATE_SUB(NOW(), INTERVAL 1 HOUR)`;
+        ? `AND data BETWEEN DATE_SUB('${timestamp}', INTERVAL 60 MINUTE) AND DATE_ADD('${timestamp}', INTERVAL 60 MINUTE)`
+        : `AND data >= DATE_SUB(NOW(), INTERVAL 2 HOUR)`;
 
-    const [rows] = await db.query(`
-        SELECT co2, voc, temperatura, DATE_FORMAT(data,'%H:%i') AS hora
-        FROM creative
-        WHERE id_sensor = ? ${whereData}
-        ORDER BY data
-        LIMIT 30
-    `, [id_sensor]);
+    let sql;
+    if (tipo === 'HPD2') {
+        // Para PCA, mapeamos: Temp -> co2, Umid -> voc, Pessoas -> temperatura (para caber no gráfico de barras do front)
+        sql = `SELECT temperatura as co2, umidade as voc, pessoas as temperatura, DATE_FORMAT(data,'%H:%i') AS hora FROM pca WHERE id_sensor = ? ${whereData} ORDER BY data ASC LIMIT 60`;
+    } else {
+        sql = `SELECT co2, voc, temperatura, DATE_FORMAT(data,'%H:%i') AS hora FROM creative WHERE id_sensor = ? ${whereData} ORDER BY data ASC LIMIT 60`;
+    }
 
+    const [rows] = await db.query(sql, [id_sensor]);
     res.json(rows);
 }));
 
@@ -623,6 +635,7 @@ router.get("/tendencia/compliance", wrap(async (req, res) => {
     );
 
     let sql;
+    let sqlParams;
     if (sensorPca[0] && id_setor !== 1) {
         sql = `
             SELECT
@@ -640,7 +653,7 @@ router.get("/tendencia/compliance", wrap(async (req, res) => {
             FROM pca
             WHERE id_sensor = ${sensorPca[0].id_sensor} AND data >= DATE_SUB(?, INTERVAL ${interval})
         `;
-        params = [anchor, anchor, anchor, anchor, anchor, anchor, anchor];
+        sqlParams = [anchor, anchor, anchor, anchor, anchor, anchor, anchor];
     } else {
         sql = `
             SELECT
@@ -655,10 +668,10 @@ router.get("/tendencia/compliance", wrap(async (req, res) => {
             FROM creative
             WHERE data >= DATE_SUB(?, INTERVAL ${interval})
         `;
-        params = [anchor];
+        sqlParams = [anchor];
     }
 
-    const [rows] = await db.query(sql);
+    const [rows] = await db.query(sql, sqlParams);
     const r = rows[0];
     const total = r.total || 1;
     function pct(ok) { return parseFloat(((ok / total) * 100).toFixed(1)); }

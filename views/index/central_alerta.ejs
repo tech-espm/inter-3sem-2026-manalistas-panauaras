@@ -221,35 +221,6 @@
             </div>
 
             <div class="detail-bottom-grid">
-              <div class="detail-logs">
-                <h4 class="detail-subtitle">
-                  Logs de Intervenção
-                </h4>
-                <div class="detail-log-list">
-                  <div class="detail-log-item">
-                    <div class="detail-log-line"></div>
-                    <div>
-                      <p class="detail-log-title">
-                        14:22 - Equipe de Manutenção Acionada
-                      </p>
-                      <p class="detail-log-text">
-                        Verificação de exaustão mecânica iniciada.
-                      </p>
-                    </div>
-                  </div>
-                  <div class="detail-log-item">
-                    <div class="detail-log-line"></div>
-                    <div>
-                      <p class="detail-log-title">
-                        14:05 - Notificação enviada à Enfermagem
-                      </p>
-                      <p class="detail-log-text">
-                        Confirmação de recebimento: Enf. Marcos.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
               <div class="detail-responsible">
                 <h4 class="detail-subtitle">
@@ -1090,7 +1061,7 @@
       applyFilters();
     }
 
-    function applyFilters() {
+    function applyFilters(returnOnly = false) {
       let filtered = [...allAlertas];
 
       // 1. Filter by Sector
@@ -1129,8 +1100,14 @@
         filters.search !== '';
       document.getElementById('btnClearFilters').style.display = hasActiveFilters ? 'inline-flex' : 'none';
 
+      if (returnOnly) return filtered;
+      
+      paginaAtual = 1; // Reseta para a primeira página ao filtrar
       renderAlertas(filtered);
     }
+
+    let paginaAtual = 1;
+    const itensPorPagina = 10;
 
     function renderAlertas(alertas) {
       const tbody = document.getElementById('alertasTbody');
@@ -1142,10 +1119,18 @@
         return;
       }
 
-      document.getElementById('alertasFooterText').innerText =
-        `Mostrando ${alertas.length} alerta${alertas.length > 1 ? 's' : ''}`;
+      // Lógica de Paginação
+      const totalPaginas = Math.ceil(alertas.length / itensPorPagina);
+      if (paginaAtual > totalPaginas) paginaAtual = totalPaginas || 1;
+      
+      const inicio = (paginaAtual - 1) * itensPorPagina;
+      const fim = inicio + itensPorPagina;
+      const alertasPagina = alertas.slice(inicio, fim);
 
-      alertas.forEach(a => {
+      document.getElementById('alertasFooterText').innerText =
+        `Mostrando ${inicio + 1}-${Math.min(fim, alertas.length)} de ${alertas.length} alertas (Página ${paginaAtual}/${totalPaginas})`;
+
+      alertasPagina.forEach(a => {
         const tagClass = TAG_CLASSES[a.parametro] || 'tag-amber';
         const sevClass = a.severidade === 'CRITICO' ? 'severity-critical' : 'severity-warning';
         const sevIcon = a.severidade === 'CRITICO' ? 'error' : 'warning';
@@ -1164,7 +1149,7 @@
         }
 
         tbody.insertAdjacentHTML('beforeend', `
-        <tr class="table-row ${a.severidade === 'CRITICO' ? 'table-row-critical' : ''}">
+        <tr class="table-row ${a.severidade === 'CRITICO' ? 'table-row-critical' : ''}" onclick="verDetalhes(${a.id_alerta}, ${a.id_sensor})">
           <td><p class="table-cell-main">${a.data_hora}</p></td>
           <td><p class="table-cell-main">${a.nome_setor}</p></td>
           <td>
@@ -1188,6 +1173,21 @@
       `);
       });
     }
+
+    // Navegação de Paginação
+    document.querySelectorAll('.pagination-button').forEach((btn, idx) => {
+      btn.onclick = () => {
+        const filtrados = applyFilters(true); // Pega os alertas filtrados sem renderizar
+        const totalPaginas = Math.ceil(filtrados.length / itensPorPagina);
+        
+        if (idx === 0 && paginaAtual > 1) { // Anterior
+          paginaAtual--;
+        } else if (idx === 1 && paginaAtual < totalPaginas) { // Próximo
+          paginaAtual++;
+        }
+        renderAlertas(filtrados);
+      };
+    });
 
     async function carregarAlertas() {
       try {

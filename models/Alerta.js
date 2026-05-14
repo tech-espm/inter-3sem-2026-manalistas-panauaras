@@ -85,7 +85,8 @@ class Alerta {
     }
 
     static async listar(filtros = {}) {
-        const { severidade, status, id_setor } = filtros;
+        const { severidade, status, id_setor, pagina = 1, limite = 10 } = filtros;
+        const offset = (pagina - 1) * limite;
 
         let where = "WHERE 1=1";
         const params = [];
@@ -95,7 +96,7 @@ class Alerta {
 
         const [rows] = await db.query(`
             SELECT
-                a.id_alerta, a.id_setor,
+                a.id_alerta, a.id_setor, a.id_sensor,
                 a.parametro, a.valor_medido, a.limite_referencia, a.unidade,
                 a.severidade, a.status,
                 DATE_FORMAT(a.disparado_em,'%d/%m %H:%i:%s') AS data_hora,
@@ -110,8 +111,8 @@ class Alerta {
             LEFT JOIN equipe eq ON eq.id_profissional = a.id_profissional_responsavel
             ${where}
             ORDER BY a.disparado_em DESC
-            LIMIT 50
-        `, params);
+            LIMIT ? OFFSET ?
+        `, [...params, parseInt(limite), parseInt(offset)]);
 
         return rows;
     }
