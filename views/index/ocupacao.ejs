@@ -281,6 +281,42 @@
       <button class="modal-btn-ok" onclick="fecharModalSucesso()">Entendido</button>
     </div>
   </div>
+
+  <!-- Modal Todos os Eventos -->
+  <div id="modalTodosEventos" class="modal-backdrop">
+    <div class="success-modal" style="max-width: 700px; padding: 1.5rem;">
+      <div class="modal-header-simple">
+        <h3 class="modal-title-big">Histórico Completo (PCA)</h3>
+        <button class="btn-close-simple" onclick="fecharModalEventos()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="table-wrapper mt-4" style="max-height: 400px; overflow-y: auto;">
+        <table class="table table-compact">
+          <thead class="events-table-head">
+            <tr>
+              <th>Horário</th>
+              <th>Evento</th>
+              <th>Ocupação</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaModalEventos">
+            <!-- Preenchido via JS -->
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-pagination mt-4">
+        <button class="pagination-btn" id="btnPrevPage" onclick="mudarPagina(-1)">
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <span id="pageInfo">Página 1 de 1</span>
+        <button class="pagination-btn" id="btnNextPage" onclick="mudarPagina(1)">
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <%- contentFor("espaco-rodape") %>
@@ -440,9 +476,51 @@
         transform: scale(1);
       }
     }
+    /* Estilos Modal Eventos */
+    .modal-header-simple {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--color-slate-100);
+      padding-bottom: 1rem;
+    }
+    html.dark .modal-header-simple { border-color: var(--color-slate-800); }
+    .btn-close-simple {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-slate-400);
+    }
+    .modal-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--color-slate-500);
+    }
+    .pagination-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--color-slate-200);
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    html.dark .pagination-btn { background: var(--color-slate-800); border-color: var(--color-slate-700); }
+    .pagination-btn:hover { background: var(--color-slate-50); color: var(--color-primary); }
+    .pagination-btn:disabled { opacity: 0.3; cursor: not-allowed; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const idSetor = urlParams.get('id_setor') || 1;
+
     const chartSettingsMini = {
       type: 'line',
       options: {
@@ -474,7 +552,7 @@
 
     async function carregarCorrelacaoAmbiental() {
       try {
-        const resp = await fetch('/api/graficos/ambiental');
+        const resp = await fetch(`/api/graficos/ambiental?id_setor=${idSetor}`);
         const data = await resp.json();
 
         if (data.length > 0) {
@@ -495,13 +573,14 @@
 
     async function carregarEventosRecentes() {
       try {
-        const resp = await fetch('/api/sensores/eventos');
+        const resp = await fetch(`/api/sensores/eventos?id_setor=${idSetor}&limit=12`);
         const eventos = await resp.json();
 
         const tbody = document.getElementById('tabelaEventos');
         tbody.innerHTML = '';
 
-        eventos.forEach(ev => {
+        // Mostra apenas os 6 primeiros na tabela da dashboard
+        eventos.slice(0, 6).forEach(ev => {
           tbody.innerHTML += `<tr class="table-row">
                 <td class="events-time">${ev.hora}</td>
                 <td>${ev.evento}</td>
@@ -514,7 +593,7 @@
 
     async function carregarOcupacao() {
       try {
-        const resp = await fetch('/api/sensores/ocupacao');
+        const resp = await fetch(`/api/sensores/ocupacao?id_setor=${idSetor}`);
         const data = await resp.json();
 
         document.getElementById('contagemOcupacao').innerText = data.pessoas_atuais;
@@ -536,7 +615,7 @@
 
     async function carregarGraficoFluxo() {
       try {
-        const resp = await fetch('/api/graficos/ocupacao');
+        const resp = await fetch(`/api/graficos/ocupacao?id_setor=${idSetor}`);
         const data = await resp.json();
 
         const labels = data.map(d => d.hora);
@@ -571,12 +650,27 @@
       } catch (err) { console.error('Erro ao desenhar grafico fluxo:', err); }
     }
 
+    async function carregarInfoSetor() {
+      try {
+        const resp = await fetch('/api/setores');
+        const setores = await resp.json();
+        const setor = setores.find(s => s.id_setor == idSetor);
+        if (setor) {
+          document.querySelector('.page-location').innerHTML = `
+            <span class="material-symbols-outlined page-location-icon">location_on</span>
+            ${setor.nome_setor} (Setor ${setor.id_setor.toString().padStart(2, '0')})
+          `;
+        }
+      } catch (e) { console.error('Erro ao buscar info setor:', e); }
+    }
+
     // Refresh general
     function reloadAllData() {
       carregarOcupacao();
       carregarGraficoFluxo();
       carregarCorrelacaoAmbiental();
       carregarEventosRecentes();
+      carregarInfoSetor();
     }
 
     // Função para executar ventilação com feedback
@@ -646,6 +740,63 @@
         }).onfinish = () => confetti.remove();
       }
     }
+
+    // Lógica do Modal de Histórico Completo
+    let todosEventos = [];
+    let paginaAtual = 1;
+    const itensPorPagina = 15;
+
+    async function abrirModalTodosEventos() {
+      try {
+        const resp = await fetch(`/api/sensores/eventos?id_setor=${idSetor}&limit=500`);
+        todosEventos = await resp.json();
+        paginaAtual = 1;
+        
+        document.getElementById('modalTodosEventos').classList.add('show');
+        document.getElementById('modalTodosEventos').querySelector('.success-modal').classList.add('show');
+        
+        renderizarPaginaEventos();
+      } catch (e) { console.error('Erro ao abrir historico:', e); }
+    }
+
+    function renderizarPaginaEventos() {
+      const tbody = document.getElementById('tabelaModalEventos');
+      tbody.innerHTML = '';
+      
+      const inicio = (paginaAtual - 1) * itensPorPagina;
+      const fim = inicio + itensPorPagina;
+      const lista = todosEventos.slice(inicio, fim);
+      const totalPaginas = Math.ceil(todosEventos.length / itensPorPagina) || 1;
+
+      lista.forEach(ev => {
+        tbody.innerHTML += `<tr class="table-row">
+          <td class="events-time">${ev.hora}</td>
+          <td>${ev.evento}</td>
+          <td>${ev.ocupacao}</td>
+          <td><span class="badge ${ev.badge}">${ev.status}</span></td>
+        </tr>`;
+      });
+
+      document.getElementById('pageInfo').innerText = `Página ${paginaAtual} de ${totalPaginas}`;
+      document.getElementById('btnPrevPage').disabled = (paginaAtual === 1);
+      document.getElementById('btnNextPage').disabled = (paginaAtual === totalPaginas);
+    }
+
+    function mudarPagina(delta) {
+      paginaAtual += delta;
+      renderizarPaginaEventos();
+    }
+
+    function fecharModalEventos() {
+      document.getElementById('modalTodosEventos').classList.remove('show');
+      document.getElementById('modalTodosEventos').querySelector('.success-modal').classList.remove('show');
+    }
+
+    // Bind do botão "Ver todos"
+    document.querySelector('.events-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      abrirModalTodosEventos();
+    });
 
     reloadAllData();
     setInterval(reloadAllData, 10000);

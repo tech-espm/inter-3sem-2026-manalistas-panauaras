@@ -3,7 +3,9 @@ const db = require("../data/db");
 class Alerta {
     static async getLatestAlertTimestamp() {
         const [[alertas]] = await db.query(`SELECT MAX(disparado_em) AS ts FROM alertas`);
-        return alertas.ts || new Date();
+        const latest = alertas.ts ? new Date(alertas.ts) : new Date();
+        const now = new Date();
+        return latest > now ? latest : now;
     }
 
     static async getKPIs() {
