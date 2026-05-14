@@ -427,12 +427,17 @@
       });
     });
   }
-
   // Inicialização Segura
   window.addEventListener('load', () => {
     carregarSetores().then(() => {
       reloadTendencia();
     });
     setInterval(reloadTendencia, 60000);
+
+    // Gerar Relatório PDF com os filtros atuais
+    document.querySelector('.export-button').addEventListener('click', () => {
+      const url = `/api/relatorio/tendencia?periodo=${periodoAtual}&idSetor=${idSetorAtual}`;
+      window.location.href = url;
+    });
   });
 </script>

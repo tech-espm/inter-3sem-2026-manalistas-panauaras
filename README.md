@@ -21,7 +21,24 @@
 
 ## Configuração do Projeto
 
-## Mais Informações
+Para rodar este projeto localmente, siga os passos abaixo:
+
+1. **Dependências do Node.js**: Instale as bibliotecas do servidor:
+   ```bash
+   npm install
+   ```
+
+2. **Dependências do Python**: Instale as bibliotecas para geração de relatórios PDF:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Banco de Dados**: Certifique-se de configurar as credenciais no arquivo `.env` (baseado no `data/db.js`).
+
+## Execução
+```bash
+npm start
+```
 
 # Licença
 

@@ -688,4 +688,53 @@ router.get("/tendencia/compliance", wrap(async (req, res) => {
     res.json({ global, parametros: result });
 }));
 
+const { exec } = require('child_process');
+const path = require('path');
+
+router.get("/relatorio/mensal", wrap(async (req, res) => {
+    const scriptPath = path.join(__dirname, '../scripts/gerar_relatorio.py');
+    
+    // Executa o script Python usando o launcher 'py' (para garantir Python 3 no Windows)
+    exec(`py "${scriptPath}"`, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Erro ao gerar relatório: ${error.message}`);
+            return res.status(500).json({ erro: 'Falha ao gerar o PDF', detalhes: error.message });
+        }
+        
+        const pdfPath = stdout.trim();
+        if (pdfPath && pdfPath.startsWith('public')) {
+            const fullPath = path.join(__dirname, '..', pdfPath);
+            res.download(fullPath, 'Super_Relatorio_Mensal_HospitaLog.pdf');
+        } else {
+            res.status(500).json({ erro: 'O gerador Python não retornou o caminho do arquivo', output: stdout });
+        }
+    });
+}));
+
+
+
+// Rota para Gerar Relatório de Tendência (Dashboard de Tendências)
+router.get("/relatorio/tendencia", wrap(async (req, res) => {
+    const periodo = req.query.periodo || '24h';
+    const idSetor = req.query.idSetor || 'all';
+    const scriptPath = path.join(__dirname, '../scripts/gerar_relatorio_tendencia.py');
+    
+    // Executa o script Python com os parâmetros de filtro
+    exec(`py "${scriptPath}" --periodo ${periodo} --id-setor ${idSetor}`, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Erro ao gerar relatório de tendência: ${error.message}`);
+            return res.status(500).json({ erro: 'Falha ao gerar o PDF de tendência', detalhes: error.message });
+        }
+        
+        const pdfPath = stdout.trim();
+        if (pdfPath && pdfPath.startsWith('public')) {
+            const fullPath = path.join(__dirname, '..', pdfPath);
+            const downloadName = `Relatorio_Tendencia_${periodo}_Setor_${idSetor}.pdf`;
+            res.download(fullPath, downloadName);
+        } else {
+            res.status(500).json({ erro: 'O gerador de tendência não retornou o caminho do arquivo', output: stdout });
+        }
+    });
+}));
+
 module.exports = router;
