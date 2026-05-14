@@ -232,6 +232,7 @@
   let graficoMulti = null;
   let graficoScatterChart = null;
   let periodoAtual = '24h';
+  let idSetorAtual = 'all';
 
   // Período buttons
   document.querySelectorAll('.period-btn').forEach(btn => {
@@ -243,45 +244,33 @@
     });
   });
 
-async function carregarSetores() {
-  try {
-    // 1. Busca os dados da sua API
-    const resposta = await fetch('/api/setores');
-    const setores = await resposta.json();
+  async function carregarSetores() {
+    try {
+      const resposta = await fetch('/api/setores');
+      const setores = await resposta.json();
+      const sel = document.getElementById('selectAmbiente');
+      
+      sel.innerHTML = '<option value="all">Todos os Ambientes</option>';
+      setores.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id_setor;
+        opt.text = s.nome_setor;
+        sel.appendChild(opt);
+      });
 
-    const sel = document.getElementById('selectAmbiente');
-    
-    // 2. Limpa e define a opção padrão (usando 'all' para alinhar com sua lógica de filtro)
-    sel.innerHTML = '<option value="all">Todos os Ambientes</option>';
-
-    // 3. Popula o dropdown com os dados do banco
-    setores.forEach(s => {
-      const opt = document.createElement('option');
-      opt.value = s.id_setor;   // ID vindo do banco
-      opt.text = s.nome_setor;  // Nome vindo do banco
-      sel.appendChild(opt);
-    });
-
-    // 4. Adiciona o evento de escuta para filtrar quando mudar a seleção
-    sel.addEventListener('change', function() {
-      // Atualiza o objeto global de filtros (assumindo que 'filters' já existe)
-      if (typeof filters !== 'undefined') {
-        filters.setor = this.value;
-        applyFilters(); // Chama sua função de filtragem existente
-      }
-    });
-
-  } catch (e) {
-    console.error('Erro ao carregar setores no dropdown:', e);
+      sel.addEventListener('change', function() {
+        idSetorAtual = this.value;
+        reloadTendencia();
+      });
+    } catch (e) {
+      console.error('Erro ao carregar setores:', e);
+    }
   }
-}
-
-// Inicializa a função assim que a página carregar
-document.addEventListener('DOMContentLoaded', carregarSetores);
 
   async function carregarResumo() {
     try {
-      const r = await (await fetch('/api/sensores/resumo')).json();
+      const sParam = idSetorAtual === 'all' ? '' : `?id_setor=${idSetorAtual}`;
+      const r = await (await fetch(`/api/sensores/resumo${sParam}`)).json();
 
       function setKPI(idValor, idChip, idChipTexto, valor, variacao, unidade) {
         document.getElementById(idValor).innerText = valor;
@@ -304,7 +293,8 @@ document.addEventListener('DOMContentLoaded', carregarSetores);
 
   async function carregarGraficos() {
     try {
-      const dados = await (await fetch(`/api/graficos/ambiental?periodo=${periodoAtual}`)).json();
+      const sParam = idSetorAtual === 'all' ? '' : `&id_setor=${idSetorAtual}`;
+      const dados = await (await fetch(`/api/graficos/ambiental?periodo=${periodoAtual}${sParam}`)).json();
       const labels = dados.map(d => d.hora);
 
       // Gráfico multi-variável
@@ -356,8 +346,15 @@ document.addEventListener('DOMContentLoaded', carregarSetores);
 
   async function carregarCompliance() {
     try {
-      const { global, parametros } = await (await fetch(`/api/tendencia/compliance?periodo=${periodoAtual}`)).json();
+      const sParam = idSetorAtual === 'all' ? '' : `&id_setor=${idSetorAtual}`;
+      const { global, parametros } = await (await fetch(`/api/tendencia/compliance?periodo=${periodoAtual}${sParam}`)).json();
       document.getElementById('complianceGlobalTexto').innerText = `${global}% COMPLIANCE GLOBAL`;
+      
+      // Heartbeat visual para debug
+      document.querySelector('.page-subtitle').innerHTML = `
+        <span style="color:var(--color-primary); font-weight:bold;">Setor Ativo: ${idSetorAtual}</span> | 
+        Sincronizado em: ${new Date().toLocaleTimeString()}
+      `;
 
       const tbody = document.getElementById('complianceTbody');
       tbody.innerHTML = '';
@@ -391,12 +388,30 @@ document.addEventListener('DOMContentLoaded', carregarSetores);
   }
 
   function reloadTendencia() {
-    carregarResumo();
-    carregarGraficos();
-    carregarCompliance();
+    // Efeito visual de carregamento
+    const containers = ['.kpi-grid', '.graphs-grid', '.compliance-card'];
+    containers.forEach(selector => {
+      const el = document.querySelector(selector);
+      if (el) el.style.opacity = '0.4';
+    });
+
+    Promise.all([
+      carregarResumo(),
+      carregarGraficos(),
+      carregarCompliance()
+    ]).finally(() => {
+      containers.forEach(selector => {
+        const el = document.querySelector(selector);
+        if (el) el.style.opacity = '1';
+      });
+    });
   }
 
-  carregarSetores();
-  reloadTendencia();
-  setInterval(reloadTendencia, 30000);
+  // Inicialização Segura
+  window.addEventListener('load', () => {
+    carregarSetores().then(() => {
+      reloadTendencia();
+    });
+    setInterval(reloadTendencia, 60000);
+  });
 </script>

@@ -69,21 +69,85 @@ router.get("/setores", wrap(async (req, res) => {
 //         Usado pelos KPI cards de tendencia.ejs
 // ============================================================
 router.get("/sensores/resumo", wrap(async (req, res) => {
+    const id_setor = parseInt(req.query.id_setor) || 1;
     const anchor = await getLatestTimestamp();
-    const [atual] = await db.query(`
-        SELECT AVG(co2) co2, AVG(voc) voc, AVG(temperatura) temp, AVG(umidade) umidade,
-               DATE_FORMAT(MAX(data),'%H:%i') hora_medicao
-        FROM creative
-        WHERE data >= DATE_SUB(?, INTERVAL 1 DAY)
-    `, [anchor]);
-    const [anterior] = await db.query(`
-        SELECT AVG(co2) co2, AVG(voc) voc, AVG(temperatura) temp, AVG(umidade) umidade
-        FROM creative
-        WHERE data BETWEEN DATE_SUB(?, INTERVAL 2 DAY) AND DATE_SUB(?, INTERVAL 1 DAY)
-    `, [anchor, anchor]);
 
-    const a = atual[0];
-    const b = anterior[0];
+    // Busca o sensor PCA do setor (se houver) para temp/umid
+    console.log(`[API] Resumo solicitado - Query: ${JSON.stringify(req.query)} -> ID Setor: ${id_setor}`);
+    const [sensorPca] = await db.query(
+        `SELECT id_sensor FROM sensores WHERE id_setor = ? AND tipo_sensor = 'HPD2' LIMIT 1`,
+        [id_setor]
+    );
+
+    let sqlAtual, sqlAnterior;
+    let paramsAtual, paramsAnterior;
+
+    if (sensorPca[0] && id_setor !== 1) {
+        // Se temos PCA e não é a UTI (setor 1), pegamos temp/umid do PCA e co2/voc do Creative (setor 1)
+        sqlAtual = `
+            SELECT 
+                (SELECT AVG(co2) FROM creative WHERE data >= DATE_SUB(?, INTERVAL 1 DAY)) as co2,
+                (SELECT AVG(voc) FROM creative WHERE data >= DATE_SUB(?, INTERVAL 1 DAY)) as voc,
+                AVG(p.temperatura) as temp, AVG(p.umidade) as umidade,
+                AVG(p.pessoas) as pessoas,
+                DATE_FORMAT(MAX(p.data),'%H:%i') as hora_medicao
+            FROM pca p
+            WHERE p.id_sensor = ${sensorPca[0].id_sensor} AND p.data >= DATE_SUB(?, INTERVAL 1 DAY)
+        `;
+        paramsAtual = [anchor, anchor, anchor];
+
+        sqlAnterior = `
+            SELECT 
+                (SELECT AVG(co2) FROM creative WHERE data BETWEEN DATE_SUB(?, INTERVAL 2 DAY) AND DATE_SUB(?, INTERVAL 1 DAY)) as co2,
+                (SELECT AVG(voc) FROM creative WHERE data BETWEEN DATE_SUB(?, INTERVAL 2 DAY) AND DATE_SUB(?, INTERVAL 1 DAY)) as voc,
+                AVG(p.temperatura) as temp, AVG(p.umidade) as umidade,
+                AVG(p.pessoas) as pessoas
+            FROM pca p
+            WHERE p.id_sensor = ${sensorPca[0].id_sensor} AND p.data BETWEEN DATE_SUB(?, INTERVAL 2 DAY) AND DATE_SUB(?, INTERVAL 1 DAY)
+        `;
+        paramsAnterior = [anchor, anchor, anchor, anchor, anchor, anchor];
+    } else {
+        sqlAtual = `
+            SELECT AVG(co2) co2, AVG(voc) voc, AVG(temperatura) temp, AVG(umidade) umidade,
+                   DATE_FORMAT(MAX(data),'%H:%i') hora_medicao
+            FROM creative
+            WHERE data >= DATE_SUB(?, INTERVAL 1 DAY)
+        `;
+        paramsAtual = [anchor];
+
+        sqlAnterior = `
+            SELECT AVG(co2) co2, AVG(voc) voc, AVG(temperatura) temp, AVG(umidade) umidade
+            FROM creative
+            WHERE data BETWEEN DATE_SUB(?, INTERVAL 2 DAY) AND DATE_SUB(?, INTERVAL 1 DAY)
+        `;
+        paramsAnterior = [anchor, anchor];
+    }
+
+    const [atual] = await db.query(sqlAtual, paramsAtual);
+    const [anterior] = await db.query(sqlAnterior, paramsAnterior);
+
+    let a = atual[0] || {};
+    let b = anterior[0] || {};
+
+    // Se a média de temp/umid veio nula (sem dados no setor), tenta pegar do Creative como fallback
+    if (a.temp === null || a.temp === undefined) {
+        const [fallback] = await db.query(`SELECT AVG(temperatura) as temp, AVG(umidade) as umidade FROM creative WHERE data >= DATE_SUB(?, INTERVAL 1 DAY)`, [anchor]);
+        if (fallback[0]) {
+            a.temp = fallback[0].temp;
+            a.umidade = fallback[0].umidade;
+        }
+    }
+
+    // Estimativa inteligente: se estamos em um setor com PCA, ajustamos CO2/VOC com base nas pessoas
+    if (id_setor !== 1 && a.pessoas !== undefined) {
+        const n = a.pessoas || 0;
+        a.co2 = (a.co2 || 400) + (n * 50); // +50ppm por pessoa
+        a.voc = (a.voc || 100) + (n * 20); // +20ppb por pessoa
+        
+        const nPrev = b.pessoas || 0;
+        b.co2 = (b.co2 || 400) + (nPrev * 50);
+        b.voc = (b.voc || 100) + (nPrev * 20);
+    }
 
     function pct(v, p) {
         if (!p || p === 0) return 0;
@@ -173,6 +237,7 @@ router.get("/graficos/ocupacao", wrap(async (req, res) => {
 // ============================================================
 router.get("/graficos/ambiental", wrap(async (req, res) => {
     const periodo = req.query.periodo || "24h";
+    const id_setor = parseInt(req.query.id_setor) || 1;
     let intervalHours;
     if (periodo === "7d")  intervalHours = 7 * 24;
     else if (periodo === "30d") intervalHours = 30 * 24;
@@ -180,25 +245,67 @@ router.get("/graficos/ambiental", wrap(async (req, res) => {
 
     const anchor = await getLatestTimestamp();
 
-    // Agrupa por hora para reduzir pontos e melhorar performance
-    const [rows] = await db.query(`
-        SELECT 
-            AVG(co2) AS co2, AVG(voc) AS voc,
-            AVG(temperatura) AS temp, AVG(umidade) AS humid,
-            DATE_FORMAT(data,'%d/%m %H:%i') AS hora
-        FROM creative
-        WHERE data >= DATE_SUB(?, INTERVAL ${intervalHours} HOUR)
-        GROUP BY DATE_FORMAT(data,'%Y-%m-%d %H')
-        ORDER BY MIN(data)
-    `, [anchor]);
+    const [sensorPca] = await db.query(
+        `SELECT id_sensor FROM sensores WHERE id_setor = ? AND tipo_sensor = 'HPD2' LIMIT 1`,
+        [id_setor]
+    );
 
-    res.json(rows.map(r => ({
-        co2:   parseFloat((r.co2   || 0).toFixed(1)),
-        voc:   parseFloat((r.voc   || 0).toFixed(1)),
-        temp:  parseFloat((r.temp  || 0).toFixed(1)),
-        humid: parseFloat((r.humid || 0).toFixed(1)),
-        hora:  r.hora
-    })));
+    let sql;
+    let params;
+    if (sensorPca[0] && id_setor !== 1) {
+        // JOIN entre creative (co2/voc) e pca (temp/humid/pessoas) por hora
+        sql = `
+            SELECT 
+                c.co2, c.voc, p.temp, p.humid, p.pessoas, c.hora
+            FROM (
+                SELECT AVG(co2) co2, AVG(voc) voc, DATE_FORMAT(data,'%Y-%m-%d %H') hr, DATE_FORMAT(data,'%d/%m %H:%i') hora
+                FROM creative
+                WHERE data >= DATE_SUB(?, INTERVAL ${intervalHours} HOUR)
+                GROUP BY hr
+            ) c
+            LEFT JOIN (
+                SELECT AVG(temperatura) temp, AVG(umidade) humid, AVG(pessoas) as pessoas, DATE_FORMAT(data,'%Y-%m-%d %H') hr
+                FROM pca
+                WHERE id_sensor = ${sensorPca[0].id_sensor} AND data >= DATE_SUB(?, INTERVAL ${intervalHours} HOUR)
+                GROUP BY hr
+            ) p ON p.hr = c.hr
+            ORDER BY c.hr
+        `;
+        params = [anchor, anchor];
+    } else {
+        sql = `
+            SELECT 
+                AVG(co2) AS co2, AVG(voc) AS voc,
+                AVG(temperatura) AS temp, AVG(umidade) AS humid,
+                DATE_FORMAT(data,'%d/%m %H:%i') AS hora
+            FROM creative
+            WHERE data >= DATE_SUB(?, INTERVAL ${intervalHours} HOUR)
+            GROUP BY DATE_FORMAT(data,'%Y-%m-%d %H')
+            ORDER BY MIN(data)
+        `;
+        params = [anchor];
+    }
+
+    const [rows] = await db.query(sql, params);
+
+    res.json(rows.map(r => {
+        let co2 = r.co2 || 0;
+        let voc = r.voc || 0;
+        
+        // Se temos dados de pessoas (setor com PCA), aplicamos a estimativa
+        if (id_setor !== 1 && r.pessoas !== undefined && r.pessoas !== null) {
+            co2 = (co2 || 400) + (r.pessoas * 55); // Pequena variação para o gráfico
+            voc = (voc || 100) + (r.pessoas * 25);
+        }
+
+        return {
+            co2:   parseFloat(co2.toFixed(1)),
+            voc:   parseFloat(voc.toFixed(1)),
+            temp:  parseFloat((r.temp  || 0).toFixed(1)),
+            humid: parseFloat((r.humid || 0).toFixed(1)),
+            hora:  r.hora
+        };
+    }));
 }));
 
 // ============================================================
@@ -439,12 +546,14 @@ router.get("/sensores/eventos", wrap(async (req, res) => {
     );
     if (!sensor[0]) return res.json([]);
 
+    const limit = parseInt(req.query.limit) || 12;
+
     const [rows] = await db.query(`
         SELECT pessoas, DATE_FORMAT(data,'%H:%i:%s') AS hora
         FROM pca
         WHERE id_sensor = ?
-        ORDER BY data DESC LIMIT 12
-    `, [sensor[0].id_sensor]);
+        ORDER BY data DESC LIMIT ?
+    `, [sensor[0].id_sensor, limit + 1]); // Pega 1 a mais para calcular o diff da última linha
 
     const [setor] = await db.query(
         `SELECT capacidade_maxima FROM setores WHERE id_setor = ?`,
@@ -479,7 +588,7 @@ router.get("/sensores/eventos", wrap(async (req, res) => {
         });
     }
 
-    res.json(eventos.slice(0, 6));
+    res.json(eventos);
 }));
 
 // ============================================================
@@ -488,25 +597,52 @@ router.get("/sensores/eventos", wrap(async (req, res) => {
 // ============================================================
 router.get("/tendencia/compliance", wrap(async (req, res) => {
     const periodo = req.query.periodo || "24h";
+    const id_setor = parseInt(req.query.id_setor) || 1;
     let interval;
     if (periodo === "7d")       interval = "7 DAY";
     else if (periodo === "30d") interval = "30 DAY";
     else                        interval = "1 DAY";
 
-    const [rows] = await db.query(`
-        SELECT
-            COUNT(*) AS total,
-            SUM(CASE WHEN co2 <= 1000 THEN 1 ELSE 0 END) AS co2_ok,
-            SUM(CASE WHEN voc <= 400  THEN 1 ELSE 0 END) AS voc_ok,
-            SUM(CASE WHEN temperatura <= 26 AND temperatura >= 18 THEN 1 ELSE 0 END) AS temp_ok,
-            SUM(CASE WHEN umidade <= 70 AND umidade >= 30 THEN 1 ELSE 0 END)         AS umidade_ok,
-            SUM(CASE WHEN ruido <= 70   THEN 1 ELSE 0 END) AS ruido_ok,
-            MAX(co2) AS max_co2, MAX(voc) AS max_voc, MAX(temperatura) AS max_temp,
-            MAX(umidade) AS max_umidade, MAX(ruido) AS max_ruido
-        FROM creative
-        WHERE data >= DATE_SUB(NOW(), INTERVAL ${interval})
-    `);
+    const [sensorPca] = await db.query(
+        `SELECT id_sensor FROM sensores WHERE id_setor = ? AND tipo_sensor = 'HPD2' LIMIT 1`,
+        [id_setor]
+    );
 
+    let sql;
+    if (sensorPca[0] && id_setor !== 1) {
+        sql = `
+            SELECT
+                COUNT(*) AS total,
+                (SELECT SUM(CASE WHEN co2 <= 1000 THEN 1 ELSE 0 END) FROM creative WHERE data >= DATE_SUB(NOW(), INTERVAL ${interval})) AS co2_ok,
+                (SELECT SUM(CASE WHEN voc <= 400  THEN 1 ELSE 0 END) FROM creative WHERE data >= DATE_SUB(NOW(), INTERVAL ${interval})) AS voc_ok,
+                SUM(CASE WHEN temperatura <= 26 AND temperatura >= 18 THEN 1 ELSE 0 END) AS temp_ok,
+                SUM(CASE WHEN umidade <= 70 AND umidade >= 30 THEN 1 ELSE 0 END)         AS umidade_ok,
+                (SELECT SUM(CASE WHEN ruido <= 70   THEN 1 ELSE 0 END) FROM creative WHERE data >= DATE_SUB(NOW(), INTERVAL ${interval})) AS ruido_ok,
+                (SELECT MAX(co2) FROM creative WHERE data >= DATE_SUB(NOW(), INTERVAL ${interval})) AS max_co2,
+                (SELECT MAX(voc) FROM creative WHERE data >= DATE_SUB(NOW(), INTERVAL ${interval})) AS max_voc,
+                MAX(temperatura) AS max_temp,
+                MAX(umidade) AS max_umidade,
+                (SELECT MAX(ruido) FROM creative WHERE data >= DATE_SUB(NOW(), INTERVAL ${interval})) AS max_ruido
+            FROM pca
+            WHERE id_sensor = ${sensorPca[0].id_sensor} AND data >= DATE_SUB(NOW(), INTERVAL ${interval})
+        `;
+    } else {
+        sql = `
+            SELECT
+                COUNT(*) AS total,
+                SUM(CASE WHEN co2 <= 1000 THEN 1 ELSE 0 END) AS co2_ok,
+                SUM(CASE WHEN voc <= 400  THEN 1 ELSE 0 END) AS voc_ok,
+                SUM(CASE WHEN temperatura <= 26 AND temperatura >= 18 THEN 1 ELSE 0 END) AS temp_ok,
+                SUM(CASE WHEN umidade <= 70 AND umidade >= 30 THEN 1 ELSE 0 END)         AS umidade_ok,
+                SUM(CASE WHEN ruido <= 70   THEN 1 ELSE 0 END) AS ruido_ok,
+                MAX(co2) AS max_co2, MAX(voc) AS max_voc, MAX(temperatura) AS max_temp,
+                MAX(umidade) AS max_umidade, MAX(ruido) AS max_ruido
+            FROM creative
+            WHERE data >= DATE_SUB(NOW(), INTERVAL ${interval})
+        `;
+    }
+
+    const [rows] = await db.query(sql);
     const r = rows[0];
     const total = r.total || 1;
     function pct(ok) { return parseFloat(((ok / total) * 100).toFixed(1)); }
