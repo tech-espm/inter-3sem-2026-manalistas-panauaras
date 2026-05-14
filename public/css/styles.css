@@ -4324,19 +4324,32 @@ html.dark .events-table-head {
         }
 
         .sobre-avatar {
-            width: 3.75rem;
-            height: 3.75rem;
+            width: 7rem;
+            height: 7rem;
+            flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 0.75rem;
-            border-radius: var(--radius-full);
+            margin: 0 auto 1rem;
+            border-radius: 50%;
             background: #e2e8f0;
             color: var(--color-slate-500);
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         .sobre-avatar .material-symbols-outlined {
             font-size: 2rem;
+        }
+
+        .sobre-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         .sobre-team-card h4 {
