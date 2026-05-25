@@ -52,7 +52,7 @@ class SuperRelatorioPDF(FPDF):
         self.set_text_color(255, 255, 255)
         self.set_font("Helvetica", "B", 8)
         self.set_xy(10, 5)
-        self.cell(120, 5, "RELATORIO MENSAL AMBIENTAL - SIAH", 0, 0, "L")
+        self.cell(120, 5, "RELATORIO MENSAL AMBIENTAL - Asclépio", 0, 0, "L")
         self.cell(70, 5, datetime.now().strftime("%B %Y").upper(), 0, 0, "R")
         self.ln(15)
 
@@ -271,7 +271,7 @@ def gerar_relatorio():
         pdf.ln(50)
         pdf.line(70, pdf.get_y(), 140, pdf.get_y())
         pdf.set_font("Helvetica", "B", 10)
-        pdf.cell(0, 8, "SIAH Analytics", 0, 1, "C")
+        pdf.cell(0, 8, "Asclépio Analytics", 0, 1, "C")
         pdf.set_font("Helvetica", "", 8)
         pdf.cell(0, 5, "Certificado Digitalmente em " + datetime.now().strftime("%d/%m/%Y"), 0, 1, "C")
 
