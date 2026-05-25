@@ -71,7 +71,7 @@ class SuperTendenciaPDF(FPDF):
         self.set_text_color(255, 255, 255)
         self.set_font("Helvetica", "B", 8)
         self.set_xy(10, 5)
-        self.cell(120, 5, "RELATORIO DE TENDENCIAS E COMPLIANCE - HOSPITALOG AI", 0, 0, "L")
+        self.cell(120, 5, "RELATORIO DE TENDENCIAS E COMPLIANCE - SIAH", 0, 0, "L")
         self.cell(70, 5, datetime.now().strftime("%d/%m/%Y %H:%M"), 0, 0, "R")
         self.ln(15)
 
@@ -210,7 +210,7 @@ def gerar_relatorio(periodo_raw, id_setor_raw):
         pdf.set_font("Helvetica", "B", 10)
         pdf.cell(0, 8, "Engenharia de Sistemas Hospitalares", 0, 1, "C")
         pdf.set_font("Helvetica", "", 8)
-        pdf.cell(0, 5, "HospitaLog AI Trend Engine", 0, 1, "C")
+        pdf.cell(0, 5, "SIAH Analytics", 0, 1, "C")
 
         # SALVAR
         filename = f"relatorio_tendencia_{periodo_raw}_{slug(id_setor_raw)}.pdf"

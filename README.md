@@ -19,25 +19,61 @@
 
 ## Objetivos do Projeto
 
-## Configuração do Projeto
+## Configuração e Execução do Projeto
 
-Para rodar este projeto localmente, siga os passos abaixo:
+Siga os passos abaixo para preparar e executar todos os componentes da aplicação (Front-end, Back-end, Banco de Dados e API Scraper).
 
-1. **Dependências do Node.js**: Instale as bibliotecas do servidor:
-   ```bash
-   npm install
-   ```
+### 1. Pré-requisitos
+Certifique-se de ter instalado em sua máquina:
+- **Node.js**
+- **Python** (e `pip`)
+- **MySQL** (Servidor rodando localmente)
 
-2. **Dependências do Python**: Instale as bibliotecas para geração de relatórios PDF:
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 2. Configuração do Banco de Dados
+1. Inicie o serviço do **MySQL**.
+2. Crie um banco de dados vazio chamado `sensores_db` (ou o nome que preferir).
+3. Importe a estrutura base e os dados iniciais executando o script SQL disponível em `sql/script_inicial.sql` no seu banco de dados.
 
-3. **Banco de Dados**: Certifique-se de configurar as credenciais no arquivo `.env` (baseado no `data/db.js`).
+### 3. Variáveis de Ambiente
+Crie um arquivo chamado `.env` na raiz do projeto. Utilize o conteúdo abaixo como base e ajuste as credenciais (`DB_USER` e `DB_PASSWORD`) de acordo com a sua instalação local do MySQL:
 
-## Execução
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=root
+DB_DATABASE=sensores_db
+```
+
+### 4. Instalação de Dependências
+
+**Dependências do Node.js (Servidor Web e Front-end):**
+No terminal, na raiz do projeto, rode o comando:
+```bash
+npm install
+```
+
+**Dependências do Python (Geração de Relatórios e API Scraper):**
+Em seguida, instale as bibliotecas Python necessárias:
+```bash
+pip install -r requirements.txt
+```
+
+### 5. Executando a Aplicação
+
+Para o funcionamento completo do sistema, você precisará de **dois terminais** abertos.
+
+**Terminal 1: Servidor Web (Front-end e API Node.js)**
+Inicie a aplicação Node. Isso também rodará automaticamente os scripts de migração complementares.
 ```bash
 npm start
+```
+Após iniciado, o sistema estará disponível no seu navegador (geralmente em `http://localhost:3000` ou a porta configurada). Os relatórios em Python serão chamados automaticamente pelo back-end conforme a necessidade.
+
+**Terminal 2: Coletor de Dados (API Scraper)**
+Para manter os dados dos sensores atualizados continuamente no banco de dados, rode o serviço em background em outro terminal:
+```bash
+python scripts/api_scraper.py
 ```
 
 # Licença
