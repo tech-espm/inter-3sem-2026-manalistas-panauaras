@@ -1,0 +1,162 @@
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-4">Meus Dados</h4>
+
+                    <div class="text-center mb-4">
+                        <div class="profile-upload" onclick="document.getElementById('inputFoto').click()" style="position:relative;width:120px;height:120px;margin:0 auto;cursor:pointer;">
+                            <img id="imgPreview" src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                                alt="Foto" class="rounded-circle shadow-sm"
+                                style="width:120px;height:120px;object-fit:cover;border:3px solid #6366f1;">
+                            <div class="overlay-icon" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0;transition:all 0.3s;">
+                                <span class="material-symbols-outlined" style="font-size:36px;color:#fff;">photo_camera</span>
+                            </div>
+                            <input type="file" id="inputFoto" name="foto" accept="image/*" style="display:none;" onchange="previewImage(this)">
+                        </div>
+                    </div>
+
+                    <form id="formMeusDados" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label">Nome</label>
+                            <input type="text" class="form-control" name="nome" id="inputNome" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" name="email" id="inputEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nova Senha <small class="text-muted">(deixe em branco para manter)</small></label>
+                            <input type="password" class="form-control" name="senha" id="inputSenha" placeholder="Nova senha">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Cargo</label>
+                            <input type="text" class="form-control" name="cargo" id="inputCargo">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Telefone</label>
+                            <input type="tel" class="form-control" name="telefone" id="inputTelefone">
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="button" onclick="window.location.href='/'" class="btn btn-outline-secondary flex-fill">Voltar</button>
+                            <button type="submit" class="btn btn-primary flex-fill">Salvar Alterações</button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <button type="button" id="btnExcluirConta" class="btn btn-outline-danger btn-sm">
+                            <span class="material-symbols-outlined align-middle me-1" style="font-size:18px;">delete</span>
+                            Excluir Conta
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .profile-upload:hover img { opacity: 0.7; }
+    .profile-upload:hover .overlay-icon { opacity: 1 !important; }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('imgPreview').src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    fetch('/api/auth/usuario')
+        .then(res => res.json())
+        .then(user => {
+            document.getElementById('inputNome').value = user.nome || '';
+            document.getElementById('inputEmail').value = user.email || '';
+            document.getElementById('inputCargo').value = user.cargo || '';
+            document.getElementById('inputTelefone').value = user.telefone || '';
+            if (user.foto) {
+                document.getElementById('imgPreview').src = user.foto;
+            }
+        })
+        .catch(() => {
+            window.location.href = '/login';
+        });
+
+    document.getElementById('formMeusDados').onsubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+
+        try {
+            const res = await fetch('/api/auth/completar-perfil', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await res.json();
+
+            if (res.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Dados atualizados!',
+                    confirmButtonColor: '#6366f1'
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: result.mensagem,
+                    confirmButtonColor: '#ef4444'
+                });
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    document.getElementById('btnExcluirConta').onclick = async () => {
+        const result = await Swal.fire({
+            title: 'Excluir conta?',
+            text: 'Esta ação não pode ser desfeita.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6366f1',
+            confirmButtonText: 'Sim, excluir',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch('/api/auth/usuario', { method: 'DELETE' });
+                const data = await res.json();
+
+                if (res.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Conta excluída!',
+                        confirmButtonColor: '#6366f1'
+                    }).then(() => {
+                        window.location.href = '/login';
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro',
+                        text: data.mensagem,
+                        confirmButtonColor: '#ef4444'
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    };
+</script>

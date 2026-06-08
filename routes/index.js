@@ -25,6 +25,10 @@ router.get('/sobre', (req, res) => {
     res.render('index/sobre', { pagina: 'sobre' });
 });
 
+router.get('/meus-dados', (req, res) => {
+    res.render('index/meus_dados', { pagina: 'meus-dados' });
+});
+
 router.get('/profile', (req, res) => {
     res.render('index/profile', { layout: false, pagina: 'profile' });
 });

@@ -85,26 +85,74 @@ router.post("/api/auth/completar-perfil", upload.single("foto"), async (req, res
         return res.status(401).json({ mensagem: "Não autorizado." });
     }
 
-    const { cargo, telefone } = req.body;
+    const { nome, email, senha, cargo, telefone } = req.body;
     const fotoPath = req.file ? `/public/uploads/profile/${req.file.filename}` : null;
 
     try {
-        await pool.query(
-            "UPDATE usuario SET cargo = ?, telefone = ?, foto = ? WHERE id_usuario = ?",
-            [cargo, telefone, fotoPath, req.session.usuario.id]
-        );
+        const updates = [];
+        const values = [];
+
+        if (nome) { updates.push("nome = ?"); values.push(nome); }
+        if (email) { updates.push("email = ?"); values.push(email); }
+        if (senha) { updates.push("senha = ?"); values.push(senha); }
+        if (cargo) { updates.push("cargo = ?"); values.push(cargo); }
+        if (telefone) { updates.push("telefone = ?"); values.push(telefone); }
+        if (fotoPath) { updates.push("foto = ?"); values.push(fotoPath); }
+
+        if (updates.length > 0) {
+            values.push(req.session.usuario.id);
+            await pool.query(
+                `UPDATE usuario SET ${updates.join(", ")} WHERE id_usuario = ?`,
+                values
+            );
+        }
 
         req.session.usuario.perfilCompleto = true;
-        req.session.usuario.cargo = cargo;
-        req.session.usuario.foto = fotoPath;
+        if (nome) req.session.usuario.nome = nome;
+        if (email) req.session.usuario.email = email;
+        if (cargo) req.session.usuario.cargo = cargo;
+        if (fotoPath) req.session.usuario.foto = fotoPath;
 
         res.json({ mensagem: "Perfil atualizado!" });
     } catch (error) {
         console.error(error);
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ mensagem: "Este email já está em uso." });
+        }
         res.status(500).json({ mensagem: "Erro ao atualizar perfil." });
     }
 });
 
+
+router.delete("/api/auth/usuario", async (req, res) => {
+    if (!req.session.usuario) {
+        return res.status(401).json({ mensagem: "Não autorizado." });
+    }
+    try {
+        await pool.query("DELETE FROM usuario WHERE id_usuario = ?", [req.session.usuario.id]);
+        req.session.destroy();
+        res.json({ mensagem: "Conta excluída com sucesso." });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensagem: "Erro ao excluir conta." });
+    }
+});
+
+router.get("/api/auth/usuario", async (req, res) => {
+    if (!req.session.usuario) {
+        return res.status(401).json({ mensagem: "Não autorizado." });
+    }
+    try {
+        const [rows] = await pool.query("SELECT id_usuario, nome, email, cargo, telefone, foto FROM usuario WHERE id_usuario = ?", [req.session.usuario.id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ mensagem: "Usuário não encontrado." });
+        }
+        res.json(rows[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensagem: "Erro interno no servidor." });
+    }
+});
 
 router.get("/logout", (req, res) => {
     req.session.destroy();
