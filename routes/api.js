@@ -493,6 +493,38 @@ router.get("/equipe", wrap(async (req, res) => {
 }));
 
 // ============================================================
+// ROTA 7.1.1: Criar Ticket Manual
+// ============================================================
+router.post("/alertas", wrap(async (req, res) => {
+    const { id_setor, parametro, severidade, status, descricao } = req.body;
+    if (!id_setor || !parametro || !severidade) {
+        return res.status(400).json({ mensagem: "Campos obrigatórios: id_setor, parametro, severidade" });
+    }
+    const id = await Alerta.criar({ id_setor, parametro, severidade, status, descricao });
+    res.status(201).json({ id_alerta: id, mensagem: "Ticket criado com sucesso!" });
+}));
+
+// ============================================================
+// ROTA 7.1.2: Atualizar Alerta
+// ============================================================
+router.put("/alertas/:id", wrap(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return res.status(400).json({ mensagem: "ID inválido" });
+    await Alerta.atualizar(id, req.body);
+    res.json({ mensagem: "Alerta atualizado!" });
+}));
+
+// ============================================================
+// ROTA 7.1.3: Deletar Alerta
+// ============================================================
+router.delete("/alertas/:id", wrap(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return res.status(400).json({ mensagem: "ID inválido" });
+    await Alerta.deletar(id);
+    res.json({ mensagem: "Alerta excluído!" });
+}));
+
+// ============================================================
 // ROTA 7.2: Transferir Responsabilidade
 // ============================================================
 router.post("/alertas/:id/transferir", wrap(async (req, res) => {

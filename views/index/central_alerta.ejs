@@ -471,14 +471,27 @@
           <div class="col-md-6">
             <p><strong>Setor:</strong> <span id="detalheSetor">--</span></p>
             <p><strong>Data/Hora:</strong> <span id="detalheData">--</span></p>
+            <p><strong>Tipo:</strong> <span id="detalheTipoOrigem">--</span></p>
           </div>
           <div class="col-md-6">
             <p><strong>Status:</strong> <span id="detalheStatusPill" class="status-pill">--</span></p>
+            <p><strong>Parâmetro:</strong> <span id="detalheParametro">--</span></p>
+            <p><strong>Gravidade:</strong> <span id="detalheSeveridade">--</span></p>
           </div>
         </div>
-        <div class="mb-4">
-          <p><strong>Descrição:</strong></p>
-          <p id="detalheDescricao" class="text-muted">--</p>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Descrição</label>
+          <textarea id="detalheDescricao" class="form-control" rows="3">--</textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Status</label>
+          <select id="detalheStatusEdit" class="form-select">
+            <option value="ABERTO">Aberto</option>
+            <option value="EM_ATENDIMENTO">Em Atendimento</option>
+            <option value="RESOLVIDO">Resolvido</option>
+          </select>
         </div>
 
         <hr>
@@ -494,6 +507,18 @@
               <p class="detail-responsible-role text-muted mb-0">--</p>
             </div>
           </div>
+        </div>
+      </div>
+      <div class="modal-footer d-flex justify-content-between">
+        <div>
+          <button type="button" class="btn btn-outline-danger" onclick="confirmarExclusaoAlerta()">
+            <span class="material-symbols-outlined align-middle me-1" style="font-size:18px;">delete</span>
+            Excluir
+          </button>
+        </div>
+        <div>
+          <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Fechar</button>
+          <button type="button" class="btn btn-primary" onclick="salvarEdicaoAlerta()">Salvar</button>
         </div>
       </div>
     </div>
@@ -882,7 +907,12 @@
       document.getElementById('detalheId').innerText = `#${a.id_alerta}`;
       document.getElementById('detalheSetor').innerText = a.nome_setor;
       document.getElementById('detalheData').innerText = a.data_hora;
-      document.getElementById('detalheDescricao').innerText = a.descricao || 'Sem descrição adicional.';
+      document.getElementById('detalheParametro').innerText = a.parametro;
+      document.getElementById('detalheSeveridade').innerText = a.severidade;
+      document.getElementById('detalheTipoOrigem').innerText = a.tipo_origem || 'AUTOMATICO';
+
+      document.getElementById('detalheDescricao').value = a.descricao || '';
+      document.getElementById('detalheStatusEdit').value = a.status;
 
       const sp = document.getElementById('detalheStatusPill');
       sp.innerText = a.status;
@@ -901,6 +931,53 @@
 
       const modal = new bootstrap.Modal(document.getElementById('modalDetalhes'));
       modal.show();
+    }
+
+    async function salvarEdicaoAlerta() {
+      if (!idAlertaSelecionado) return;
+      const dados = {
+        descricao: document.getElementById('detalheDescricao').value,
+        status: document.getElementById('detalheStatusEdit').value
+      };
+      try {
+        const res = await fetch(`/api/alertas/${idAlertaSelecionado}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dados)
+        });
+        if (res.ok) {
+          const modal = bootstrap.Modal.getInstance(document.getElementById('modalDetalhes'));
+          if (modal) modal.hide();
+          if (window.Swal) {
+            Swal.fire({ title: 'Atualizado!', text: 'Alerta atualizado com sucesso.', icon: 'success', confirmButtonColor: '#136dec' });
+          }
+          reloadCentral();
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    async function confirmarExclusaoAlerta() {
+      if (!idAlertaSelecionado) return;
+      const result = await Swal.fire({
+        title: 'Excluir alerta?',
+        text: 'Esta ação não pode ser desfeita.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6366f1',
+        confirmButtonText: 'Sim, excluir',
+        cancelButtonText: 'Cancelar'
+      });
+      if (!result.isConfirmed) return;
+      try {
+        const res = await fetch(`/api/alertas/${idAlertaSelecionado}`, { method: 'DELETE' });
+        if (res.ok) {
+          const modal = bootstrap.Modal.getInstance(document.getElementById('modalDetalhes'));
+          if (modal) modal.hide();
+          Swal.fire({ title: 'Excluído!', text: 'Alerta removido.', icon: 'success', confirmButtonColor: '#136dec' });
+          reloadCentral();
+        }
+      } catch (e) { console.error(e); }
     }
 
     async function abrirModalTransferencia() {
@@ -1151,7 +1228,7 @@
         tbody.insertAdjacentHTML('beforeend', `
         <tr class="table-row ${a.severidade === 'CRITICO' ? 'table-row-critical' : ''}" onclick="verDetalhes(${a.id_alerta}, ${a.id_sensor})">
           <td><p class="table-cell-main">${a.data_hora}</p></td>
-          <td><p class="table-cell-main">${a.nome_setor}</p></td>
+          <td><p class="table-cell-main">${a.nome_setor}${a.tipo_origem === 'MANUAL' ? ' <span class="badge bg-secondary" style="font-size:0.6rem;vertical-align:middle;">Manual</span>' : ''}</p></td>
           <td>
             <div class="table-tag-with-text">
               <span class="tag ${tagClass}">${a.parametro}</span>
@@ -1385,35 +1462,49 @@
         parametro: document.getElementById('ticketTipo').value,
         severidade: document.getElementById('ticketGravidade').value,
         status: document.getElementById('ticketStatus').value,
-        descricao: document.getElementById('ticketDesc').value,
-        data_hora: new Date().toLocaleString('pt-BR') // Automático
+        descricao: document.getElementById('ticketDesc').value
       };
-
-      console.log('Criando novo ticket:', data);
 
       const btn = event.target.querySelector('.btn-primary');
       btn.disabled = true;
       btn.innerText = 'Registrando...';
 
-      setTimeout(() => {
-        closeNovoTicketModal();
+      try {
+        const res = await fetch('/api/alertas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          closeNovoTicketModal();
+          if (window.Swal) {
+            Swal.fire({
+              title: 'Ticket Registrado!',
+              text: 'O novo ticket foi adicionado à central.',
+              icon: 'success',
+              confirmButtonColor: '#136dec'
+            });
+          }
+          reloadCentral();
+        } else {
+          if (window.Swal) {
+            Swal.fire({
+              title: 'Erro',
+              text: result.mensagem || 'Erro ao criar ticket.',
+              icon: 'error',
+              confirmButtonColor: '#ef4444'
+            });
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
         btn.disabled = false;
         btn.innerText = 'Registrar Ticket';
-
-        if (window.Swal) {
-          Swal.fire({
-            title: 'Ticket Registrado!',
-            text: 'O novo ticket foi adicionado à central.',
-            icon: 'success',
-            confirmButtonColor: '#136dec'
-          });
-        } else {
-          alert('Ticket registrado com sucesso!');
-        }
-
-        // Simulação: recarregar alertas para mostrar o "novo" (embora sem backend persistente para este novo ticket, ele não aparecerá de verdade sem um POST real)
-        reloadCentral();
-      }, 1500);
+      }
     }
 
     initFilters();

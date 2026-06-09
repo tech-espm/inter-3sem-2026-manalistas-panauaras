@@ -98,7 +98,7 @@ class Alerta {
             SELECT
                 a.id_alerta, a.id_setor, a.id_sensor,
                 a.parametro, a.valor_medido, a.limite_referencia, a.unidade,
-                a.severidade, a.status,
+                a.severidade, a.status, a.tipo_origem,
                 DATE_FORMAT(a.disparado_em,'%d/%m %H:%i:%s') AS data_hora,
                 TIMESTAMPDIFF(MINUTE, a.disparado_em, IFNULL(a.atendimento_iniciado_em, NOW())) AS minutos_ate_atendimento,
                 TIMESTAMPDIFF(MINUTE, a.disparado_em, NOW()) AS minutos_desde_disparo,
@@ -125,6 +125,31 @@ class Alerta {
                 atendimento_iniciado_em = IFNULL(atendimento_iniciado_em, NOW())
             WHERE id_alerta = ?
         `, [idProfissional, idAlerta]);
+    }
+
+    static async criar(dados) {
+        const { id_setor, parametro, severidade, status, descricao } = dados;
+        const [result] = await db.query(`
+            INSERT INTO alertas (id_setor, parametro, severidade, status, descricao, tipo_origem, disparado_em, valor_medido, limite_referencia, unidade)
+            VALUES (?, ?, ?, ?, ?, 'MANUAL', NOW(), NULL, NULL, NULL)
+        `, [id_setor, parametro, severidade, status || 'ABERTO', descricao]);
+        return result.insertId;
+    }
+
+    static async atualizar(id, dados) {
+        const updates = [];
+        const values = [];
+        if (dados.parametro !== undefined) { updates.push("parametro = ?"); values.push(dados.parametro); }
+        if (dados.severidade !== undefined) { updates.push("severidade = ?"); values.push(dados.severidade); }
+        if (dados.status !== undefined) { updates.push("status = ?"); values.push(dados.status); }
+        if (dados.descricao !== undefined) { updates.push("descricao = ?"); values.push(dados.descricao); }
+        if (updates.length === 0) return;
+        values.push(id);
+        await db.query(`UPDATE alertas SET ${updates.join(", ")} WHERE id_alerta = ?`, values);
+    }
+
+    static async deletar(id) {
+        await db.query("DELETE FROM alertas WHERE id_alerta = ?", [id]);
     }
 }
 

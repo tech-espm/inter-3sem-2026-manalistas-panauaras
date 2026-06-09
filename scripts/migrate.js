@@ -5,7 +5,8 @@ const path = require('path');
 const migrations = [
   'create_user_table.js',
   'update_user_table.js',
-  'db_v2_equipe.js'
+  'db_v2_equipe.js',
+  'db_v3_alertas_ticket.js'
 ];
 
 console.log("=== Iniciando Sincronização do Banco de Dados ===");
